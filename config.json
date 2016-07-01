@@ -1,0 +1,92 @@
+{
+	"port":"8082",
+	"portDyn":"8086",
+	"portRT":"8087",
+	"max_keep_dyn":"6",
+	"dataPath":"/outils/NodeJS/data/",
+	"dataFilter":"rectangle.geojson",
+	"data":[
+		{"type":"arret","file":"Arrets.geojson","find":"LIBELLE"},
+		{"type":"lieux","file":"Lieux.geojson","find":"LIBELLE"},
+		{"type":"agenceM","file":"AgencesMobilite.geojson","find":"NOM"},
+		{"type":"citelibold","file":"citelib.geojson","find":"Nom de la station"},
+		{"type":"pointService","file":"PointsServices.geojson","find":"NOM"},
+		{"type":"dat","file":"dat.geojson","find":"ARRET"},
+		{"type":"depositaire","file":"Depositaires.geojson","find":"NOM"},
+		{"type":"PMV","file":"PMV.geojson","find":"LIBELLE"},
+		{"type":"pointArret","file":"PointArret.geojson","find":"LIBELLE"},
+		{"type":"PAR","file":"Parkings.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"PAR"}},
+		{"type":"PKG","file":"Parkings.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"PKG"}},
+		{"type":"MVA","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"AGENCE METRO-VELO"}},
+		{"type":"MVC","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"CONSIGNE METRO-VELO"}},
+		{"type":"AGENCE METRO-VELO","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"AGENCE METRO-VELO"}},
+		{"type":"CONSIGNE METRO-VELO","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"CONSIGNE METRO-VELO"}},
+		{"type":"CAM","file":"cameras.geojson","find":"LIBELLE"},
+		{"type":"rue","file":"rues.geojson","find":"LIBELLE"},
+		{"type":"PME","file":"pme.geojson"}
+	],
+	"plugins":{
+		"piwik":{
+			"url":"http://192.168.245.1/stats/piwik.php",
+			"domain":"http://mondomaine",
+			"siteId":"8"
+		},
+		"points":{},
+		"findWs":{},
+		"trr":{
+			"types":["trr"],
+			"file":"Troncons.geojson"
+		},
+		"lines":{
+			"lineType":"lignesTypees",
+			"lineFile":"lignes.json",
+			"geomType":"ligne",
+			"geomFile":"LignesLight.geojson"
+		},
+		"otpIti":{
+			"url":"http://192.168.245.9/otp"
+		},
+		"citiz":{
+			"url":"http://production.citiz.fr/public/fleet/stations/5"
+		},
+		"otpHoraires":{
+			"nbTripsStatique":4,
+			"url":"http://192.168.245.9/otp",
+			"dependencies":{
+				"horairesSEM":{
+					"agency":"SEM",
+					"url":"http://tag.tim.cityway.fr/WebServices/TransinfoService/api",
+					"key":"&key=TAG",
+					"tripUpdate":"http://tag.tim.cityway.fr/ftp/GtfsRT/GtfsRT.TAG.pb"
+				},
+				"horairesC38":{
+					"agency":"C38",
+					"url":"http://www.itinisere.fr/webServices/TransinfoService/api",
+					"key":"&user_key=CLE_PRIVEE"
+				}
+			},
+			"stopLinks":{
+				"file":"stopsLinks.json",
+				"primaryAgency":"SEM",
+				"secondaryAgency":"C38"
+			}
+		},
+		"hamo":{
+			"hamoList":"https://gride.gr-tsc.com/omms_sp/station/list",
+			"hamoComsAvail":"https://gride.gr-tsc.com/omms_sp/station/available/list?search_type=1&car_type=1",
+			"hamoIRoadAvail":"https://gride.gr-tsc.com/omms_sp/station/available/list?search_type=1&car_type=2",
+			"hamoDynDetail":"https://gride.gr-tsc.com/omms_sp/station/detail?station_id="
+		},
+		"dynWs":{},
+		"webcam":{},
+		"trrC38":{
+			"url":"http://www.itinisere.fr/webServices/TransinfoService/api",
+			"key":"&user_key=CLE_PRIVEE"
+		},
+		"atmo":{
+			"atmoBassinData":"http://bassingrenoblois.air-rhonealpes.fr/data",
+			"atmoImg":"http://www.air-rhonealpes.fr/sites/ra/files/thumbnails/image/",
+			"types":["indiceAtmo", "indiceAtmoFull"]
+		}
+	}
+}

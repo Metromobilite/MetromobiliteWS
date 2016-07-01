@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "NOM": "Agence de Mobilité Centre-Ville", "RUE": "49, avenue Alscace Lorraine", "CODEPOSTAL": 38000, "COMMUNE": "GRENOBLE", "TYPE": "Agence Mobilité" }, "geometry": { "type": "Point", "coordinates": [ 5.71733, 45.18974 ] } },
+{ "type": "Feature", "properties": { "NOM": "Agence de Mobilité StationMobile", "RUE": "15, boulevard Joseph Vallier", "CODEPOSTAL": 38000, "COMMUNE": "GRENOBLE", "TYPE": "Agence Mobilité" }, "geometry": { "type": "Point", "coordinates": [ 5.71308, 45.17995 ] } },
+{ "type": "Feature", "properties": { "NOM": "Agence de Mobilité Grand'Place", "RUE": "Grand'Place", "CODEPOSTAL": 38000, "COMMUNE": "GRENOBLE", "TYPE": "Agence Mobilité" }, "geometry": { "type": "Point", "coordinates": [ 5.73224, 45.15892 ] } }
+]
+}

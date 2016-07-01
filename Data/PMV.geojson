@@ -1,0 +1,5 @@
+{ "eacute" : "é" ,"type": "FeatureCollection", "features": [
+{ "type": "Feature", "properties": { "CODE": "GRE_PMV_1001", "LIBELLE" : "RN 90", "ADRESSE" : "D1090", "TYPE" : "PMV", "MESSAGES": "" }, "geometry": { "type": "Point", "coordinates": [  5.746580, 45.192649]  } },
+{ "type": "Feature", "properties": { "CODE": "GRE_PMV_1002", "LIBELLE" : "PERI", "ADRESSE" : "GABRIEL PERI (AVENUE)", "TYPE" : "PMV", "MESSAGES": "" }, "geometry": { "type": "Point", "coordinates": [  5.747922, 45.188263]  } },
+{ "type": "Feature", "properties": { "CODE": "GAM_PMV_001", "LIBELLE" : "ECHIROLLES JEAN JAURES", "ADRESSE" : "10 COURS JEAN-JAURES", "TYPE" : "PMV", "MESSAGES": "" }, "geometry": { "type": "Point", "coordinates": [  5.708609, 45.156968]  } }
+]}

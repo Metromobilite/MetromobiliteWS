@@ -1,0 +1,1491 @@
+{
+	"type": "FeatureCollection",
+	"crs": {
+		"type": "name",
+		"properties": {
+			"name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+		}
+	},
+	"features": [{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1001,
+			"CODE_ARRET": "SEM_0361",
+			"stop_lon": 5.732955,
+			"stop_lat": 45.168967,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, MALHERBE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.732955,
+			45.168967]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1002,
+			"CODE_ARRET": "SEM_0372",
+			"stop_lon": 5.737116,
+			"stop_lat": 45.169992,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, LOUIS JOUVET",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.737116,
+			45.169992]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1003,
+			"CODE_ARRET": "SEM_0373",
+			"stop_lon": 5.745910,
+			"stop_lat": 45.178268,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, SAINT-AUGUSTIN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.74591,
+			45.178268]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1004,
+			"CODE_ARRET": "SEM_0374",
+			"stop_lon": 5.755072,
+			"stop_lat": 45.179013,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, EDOUARD VAILLANT",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.755072,
+			45.179013]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1005,
+			"CODE_ARRET": "SEM_0375",
+			"stop_lon": 5.757187,
+			"stop_lat": 45.181316,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, PIERRE SEMARD",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.757187,
+			45.181316]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1006,
+			"CODE_ARRET": "SEM_0376",
+			"stop_lon": 5.757121,
+			"stop_lat": 45.181282,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, PIERRE SEMARD",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.757121,
+			45.181282]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1007,
+			"CODE_ARRET": "SEM_0535",
+			"stop_lon": 5.768461,
+			"stop_lat": 45.184731,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, CHAMP ROMAN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.768461,
+			45.184731]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1008,
+			"CODE_ARRET": "SEM_0649",
+			"stop_lon": 5.769578,
+			"stop_lat": 45.187137,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, PROMOTION SOCIALE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.769578,
+			45.187137]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1009,
+			"CODE_ARRET": "SEM_0650",
+			"stop_lon": 5.769634,
+			"stop_lat": 45.187433,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, PROMOTION SOCIALE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.769634,
+			45.187433]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1010,
+			"CODE_ARRET": "SEM_0652",
+			"stop_lon": 5.769287,
+			"stop_lat": 45.190063,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, SCIENCES SOCIALES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.769287,
+			45.190063]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1011,
+			"CODE_ARRET": "SEM_0654",
+			"stop_lon": 5.770379,
+			"stop_lat": 45.191659,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, BIBLIOTHEQUES UNIVERSITAIRES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.770379,
+			45.191659]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1012,
+			"CODE_ARRET": "SEM_0797",
+			"stop_lon": 5.733079,
+			"stop_lat": 45.168918,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, MALHERBE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.733079,
+			45.168918]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1013,
+			"CODE_ARRET": "SEM_0798",
+			"stop_lon": 5.736905,
+			"stop_lat": 45.169873,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, LOUIS JOUVET",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.736905,
+			45.169873]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1014,
+			"CODE_ARRET": "SEM_0799",
+			"stop_lon": 5.740307,
+			"stop_lat": 45.170759,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, TEISSEIRE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.740307,
+			45.170759]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1015,
+			"CODE_ARRET": "SEM_0800",
+			"stop_lon": 5.740158,
+			"stop_lat": 45.170809,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, TEISSEIRE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.740158,
+			45.170809]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1016,
+			"CODE_ARRET": "SEM_0801",
+			"stop_lon": 5.745782,
+			"stop_lat": 45.172644,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, PAUL COCAT",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 13,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.745782,
+			45.172644]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1017,
+			"CODE_ARRET": "SEM_0802",
+			"stop_lon": 5.710860,
+			"stop_lat": 45.191637,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, PALAIS DE JUSTICE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.71086,
+			45.191637]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1018,
+			"CODE_ARRET": "SEM_0805",
+			"stop_lon": 5.745395,
+			"stop_lat": 45.178166,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, SAINT-AUGUSTIN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.745395,
+			45.178166]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1019,
+			"CODE_ARRET": "SEM_0806",
+			"stop_lon": 5.750893,
+			"stop_lat": 45.178754,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, BON PASTEUR",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.750893,
+			45.178754]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1020,
+			"CODE_ARRET": "SEM_0808",
+			"stop_lon": 5.754934,
+			"stop_lat": 45.179053,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, EDOUARD VAILLANT",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.754934,
+			45.179053]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1021,
+			"CODE_ARRET": "SEM_0909",
+			"stop_lon": 5.760322,
+			"stop_lat": 45.185910,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, CLINIQUE BELLEDONNE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 15,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 57,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.760322,
+			45.18591]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1022,
+			"CODE_ARRET": "SEM_0910",
+			"stop_lon": 5.760950,
+			"stop_lat": 45.185981,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, CLINIQUE BELLEDONNE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 15,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 57,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.76095,
+			45.185981]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1023,
+			"CODE_ARRET": "SEM_0923",
+			"stop_lon": 5.705805,
+			"stop_lat": 45.188486,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, BERRIAT-LE MAGASIN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705805,
+			45.188486]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1024,
+			"CODE_ARRET": "SEM_0924",
+			"stop_lon": 5.705905,
+			"stop_lat": 45.188672,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, BERRIAT-LE MAGASIN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705905,
+			45.188672]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1025,
+			"CODE_ARRET": "SEM_0925",
+			"stop_lon": 5.705638,
+			"stop_lat": 45.184899,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, CEMOI",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705638,
+			45.184899]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1026,
+			"CODE_ARRET": "SEM_0926",
+			"stop_lon": 5.705730,
+			"stop_lat": 45.184950,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, CEMOI",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.70573,
+			45.18495]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1027,
+			"CODE_ARRET": "SEM_1037",
+			"stop_lon": 5.775249,
+			"stop_lat": 45.191950,
+			"ABIVIP": null,
+			"ARRET": "GIERES, UNIVERSITES-BIOLOGIE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.775249,
+			45.19195]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1028,
+			"CODE_ARRET": "SEM_1067",
+			"stop_lon": 5.749902,
+			"stop_lat": 45.178586,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, BON PASTEUR",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.749902,
+			45.178586]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1029,
+			"CODE_ARRET": "SEM_1182",
+			"stop_lon": 5.774739,
+			"stop_lat": 45.191948,
+			"ABIVIP": null,
+			"ARRET": "GIERES, UNIVERSITES-BIOLOGIE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.774739,
+			45.191948]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1030,
+			"CODE_ARRET": "SEM_1184",
+			"stop_lon": 5.769204,
+			"stop_lat": 45.190165,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, SCIENCES SOCIALES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.769204,
+			45.190165]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1031,
+			"CODE_ARRET": "SEM_1265",
+			"stop_lon": 5.770292,
+			"stop_lat": 45.191689,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, BIBLIOTHEQUES UNIVERSITAIRES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 11,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 69,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.770292,
+			45.191689]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1032,
+			"CODE_ARRET": "SEM_1273",
+			"stop_lon": 5.744778,
+			"stop_lat": 45.172261,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, PAUL COCAT",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.744778,
+			45.172261]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1033,
+			"CODE_ARRET": "SEM_1444",
+			"stop_lon": 5.706322,
+			"stop_lat": 45.172453,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, DOCTEUR SCHWEITZER",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 12,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.706322,
+			45.172453]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1034,
+			"CODE_ARRET": "SEM_1446",
+			"stop_lon": 5.727906,
+			"stop_lat": 45.170490,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, FLAUBERT-CLOS D'OR",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.727906,
+			45.17049]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1035,
+			"CODE_ARRET": "SEM_1447",
+			"stop_lon": 5.723955,
+			"stop_lat": 45.171880,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, STALINGRAD-ALLIES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.723955,
+			45.17188]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1036,
+			"CODE_ARRET": "SEM_1448",
+			"stop_lon": 5.718048,
+			"stop_lat": 45.173537,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, MARCHE D'INTERET NATIONAL",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.718048,
+			45.173537]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1037,
+			"CODE_ARRET": "SEM_1449",
+			"stop_lon": 5.714000,
+			"stop_lat": 45.174786,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ALLIES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.714,
+			45.174786]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1038,
+			"CODE_ARRET": "SEM_1450",
+			"stop_lon": 5.710571,
+			"stop_lat": 45.173044,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, LYS ROUGE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.710571,
+			45.173044]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1039,
+			"CODE_ARRET": "SEM_1451",
+			"stop_lon": 5.705215,
+			"stop_lat": 45.174971,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, RHIN ET DANUBE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705215,
+			45.174971]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1040,
+			"CODE_ARRET": "SEM_1452",
+			"stop_lon": 5.705462,
+			"stop_lat": 45.179682,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, VALLIER-CATANE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705462,
+			45.179682]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1041,
+			"CODE_ARRET": "SEM_1453",
+			"stop_lon": 5.705296,
+			"stop_lat": 45.179669,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, VALLIER-CATANE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705296,
+			45.179669]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1042,
+			"CODE_ARRET": "SEM_1454",
+			"stop_lon": 5.705108,
+			"stop_lat": 45.175110,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, RHIN ET DANUBE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.705108,
+			45.17511]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1043,
+			"CODE_ARRET": "SEM_1455",
+			"stop_lon": 5.714081,
+			"stop_lat": 45.174450,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ALLIES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.714081,
+			45.17445]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1044,
+			"CODE_ARRET": "SEM_1456",
+			"stop_lon": 5.718079,
+			"stop_lat": 45.173419,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, MARCHE D'INTERET NATIONAL",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.718079,
+			45.173419]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1045,
+			"CODE_ARRET": "SEM_1457",
+			"stop_lon": 5.724825,
+			"stop_lat": 45.171530,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, STALINGRAD-ALLIES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.724825,
+			45.17153]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1046,
+			"CODE_ARRET": "SEM_1458",
+			"stop_lon": 5.727227,
+			"stop_lat": 45.170628,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, FLAUBERT-CLOS D'OR",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.727227,
+			45.170628]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1047,
+			"CODE_ARRET": "SEM_1550",
+			"stop_lon": 5.767456,
+			"stop_lat": 45.184528,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, CHAMP ROMAN",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 15,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 57,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.767456,
+			45.184528]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1048,
+			"CODE_ARRET": "SEM_1572",
+			"stop_lon": 5.706776,
+			"stop_lat": 45.172376,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, DOCTEUR SCHWEITZER",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 12,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.706776,
+			45.172376]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1049,
+			"CODE_ARRET": "SEM_1573",
+			"stop_lon": 5.708299,
+			"stop_lat": 45.174410,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, HENRI DUNANT",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 12,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.708299,
+			45.17441]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1050,
+			"CODE_ARRET": "SEM_1689",
+			"stop_lon": 5.757582,
+			"stop_lat": 45.185868,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, NEYRPIC-BELLEDONNE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.757582,
+			45.185868]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1051,
+			"CODE_ARRET": "SEM_1690",
+			"stop_lon": 5.757431,
+			"stop_lat": 45.185909,
+			"ABIVIP": null,
+			"ARRET": "SAINT-MARTIN-D'HERES, NEYRPIC-BELLEDONNE",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.757431,
+			45.185909]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1052,
+			"CODE_ARRET": "SEM_1783",
+			"stop_lon": 5.744035,
+			"stop_lat": 45.175921,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ANDRE ARGOUGES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 13,
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.744035,
+			45.175921]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1053,
+			"CODE_ARRET": "SEM_1784",
+			"stop_lon": 5.744746,
+			"stop_lat": 45.175062,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ANDRE ARGOUGES",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			},
+			{
+				"NLG": 13,
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.744746,
+			45.175062]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1054,
+			"CODE_ARRET": "SEM_4280",
+			"stop_lon": 5.706826,
+			"stop_lat": 45.191255,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ESCLANGON",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "R",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.706826,
+			45.191255]
+		}
+	},
+	{
+		"type": "Feature",
+		"properties": {
+			"NBIV": 1055,
+			"CODE_ARRET": "SEM_4281",
+			"stop_lon": 5.706502,
+			"stop_lat": 45.191580,
+			"ABIVIP": null,
+			"ARRET": "GRENOBLE, ESCLANGON",
+			"TAP": 5,
+			"TAIC": 8,
+			"LBIV": [{
+				"NLG": "C5",
+				"SENS": "A",
+				"NB_HOR": 2,
+				"PRI": 1
+			}]
+		},
+		"geometry": {
+			"type": "Point",
+			"coordinates": [5.706502,
+			45.19158]
+		}
+	}]
+}

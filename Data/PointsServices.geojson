@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "NOM": "Point Service Campus", "RUE": "442, avenue de la Bibliothèque", "CODEPOSTAL": 38400, "COMMUNE": "ST-MARTIN-D'HERES", "TYPE": "Point Service" }, "geometry": { "type": "Point", "coordinates": [ 5.7711, 45.19268 ] } },
+{ "type": "Feature", "properties": { "NOM": "Agence TransIsère Le Square", "RUE": "11, boulevard Agutte Sembat", "CODEPOSTAL": 38000, "COMMUNE": "GRENOBLE", "TYPE": "Point Service" }, "geometry": { "type": "Point", "coordinates": [ 5.72732, 45.1875 ] } }
+]
+}

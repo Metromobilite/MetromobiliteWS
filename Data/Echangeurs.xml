@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Racine>
+<Axe Nom="A 48">
+<Direction Nom="GRENOBLE" Liste="START;9;10;12;14;END">
+<Echangeur Sortie="START" Nom="LA-COTE-ST-ANDRE"/>
+<Echangeur Sortie="9" Nom="RIVES"/>
+<Echangeur Sortie="10" Nom="VOIRON"/>
+<Echangeur Sortie="12" Nom="VOREPPE"/>
+<Echangeur Sortie="14" Nom="LE FONTANIL - ST-EGREVE"/>
+<Echangeur Sortie="END" Nom="GRENOBLE CENTRE"/>
+</Direction>
+<Direction Nom="LYON" Liste="START;14;13;12;11;10;9;END">
+<Echangeur Sortie="START" Nom="ST-EGREVE ZI"/>
+<Echangeur Sortie="14" Nom="ST-EGREVE - LE FONTANIL"/>
+<Echangeur Sortie="13" Nom="VOREPPE"/>
+<Echangeur Sortie="12" Nom="VALENCE"/>
+<Echangeur Sortie="11" Nom="VOIRON - MOIRANS"/>
+<Echangeur Sortie="10" Nom="LES ABRETS"/>
+<Echangeur Sortie="9" Nom="RIVES"/>
+<Echangeur Sortie="END" Nom="LA-COTE-ST-ANDRE"/>
+</Direction>
+</Axe>
+<Axe Nom="N 481">
+<Direction Nom="GRENOBLE" Liste="START;16;END">
+<Echangeur Sortie="START" Nom="ST-EGREVE"/>
+<Echangeur Sortie="16" Nom="GRENOBLE-GARES"/>
+<Echangeur Sortie="END" Nom="GRENOBLE"/>
+</Direction>
+<Direction Nom="LYON" Liste="START;17;15;END">
+<Echangeur Sortie="START" Nom="GRENOBLE"/>
+<Echangeur Sortie="17" Nom="ST-MARTIN-LE-VINOUX"/>
+<Echangeur Sortie="15" Nom="Z.A. ST-EGREVE"/>
+<Echangeur Sortie="END" Nom="ST-EGREVE"/>
+</Direction>
+</Axe>
+<Axe Nom="A 480">
+<Direction Nom="SISTERON" Liste="START;1;2;3a;3b;4;5;6;7;8;9;END">
+<Echangeur Sortie="START" Nom="A 48"/>
+<Echangeur Sortie="1" Nom="SASSENAGE"/>
+<Echangeur Sortie="2" Nom="FONTAINE"/>
+<Echangeur Sortie="3a" Nom="SEYSSINET"/>
+<Echangeur Sortie="3b" Nom="GRENOBLE CENTRE"/>
+<Echangeur Sortie="4" Nom="EAUX CLAIRES"/>
+<Echangeur Sortie="5" Nom="SEYSSINS"/>
+<Echangeur Sortie="6" Nom="COMBOIRE NORD"/>
+<Echangeur Sortie="7" Nom="PONT DE CLAIX"/>
+<Echangeur Sortie="8" Nom="VIZILLE - GAP"/>
+<Echangeur Sortie="9" Nom="CLAIX"/>
+<Echangeur Sortie="END" Nom="A 51"/>
+</Direction>
+<Direction Nom="LYON" Liste="START;7;6;5a;5b;4;3b;3a;2;1;END">
+<Echangeur Sortie="START" Nom="A 51"/>
+<Echangeur Sortie="7" Nom="PONT DE CLAIX"/>
+<Echangeur Sortie="6" Nom="COMBOIRE"/>
+<Echangeur Sortie="5a" Nom="ROCADE SUD - CHAMBERY"/>
+<Echangeur Sortie="5b" Nom="SEYSSINS"/>
+<Echangeur Sortie="4" Nom="EAUX CLAIRES"/>
+<Echangeur Sortie="3b" Nom="GRENOBLE CENTRE"/>
+<Echangeur Sortie="3a" Nom="SEYSSINET"/>
+<Echangeur Sortie="2" Nom="FONTAINE"/>
+<Echangeur Sortie="1" Nom="SASSENAGE"/>
+<Echangeur Sortie="END" Nom="A 48"/>
+</Direction>
+</Axe>
+<Axe Nom="A 51">
+<Direction Nom="SISTERON" Liste="START;10;11;12;13;END">
+<Echangeur Sortie="START" Nom="A 480"/>
+<Echangeur Sortie="10" Nom="VARCES - CLAIX"/>
+<Echangeur Sortie="11" Nom="ST-PAUL-DE-VARCES"/>
+<Echangeur Sortie="12" Nom="VIF"/>
+<Echangeur Sortie="13" Nom="SINARD"/>
+<Echangeur Sortie="END" Nom="MONESTIER DE CLERMONT"/>
+</Direction>
+<Direction Nom="GRENOBLE" Liste="START;12;9;END">
+<Echangeur Sortie="START" Nom="MONESTIER DE CLERMONT"/>
+<Echangeur Sortie="12" Nom="VARCES - VIF"/>
+<Echangeur Sortie="9" Nom="CLAIX"/>
+<Echangeur Sortie="END" Nom="A480"/>
+</Direction>
+</Axe>
+<Axe Nom="ROCADE SUD">
+<Direction Nom="LYON" Liste="START;1;2;4;5;6;7;8;END">
+<Echangeur Sortie="START" Nom="A 41"/>
+<Echangeur Sortie="1" Nom="ZI CHAMP ROMAN - DOMAINE UNIVERSITAIRE"/>
+<Echangeur Sortie="2" Nom="GIERES CENTRE - ST-MARTIN-D'HERES PERI"/>
+<Echangeur Sortie="4" Nom="ST-MARTIN-D'HERES CENTRE"/>
+<Echangeur Sortie="5" Nom="EYBENS CENTRE"/>
+<Echangeur Sortie="6" Nom="EYBENS LES RUIRES - ALPEXPO"/>
+<Echangeur Sortie="7" Nom="ECHIROLLES CENTRE - VILLENEUVE"/>
+<Echangeur Sortie="8" Nom="PONT DE CLAIX - GRENOBLE LIBERATION"/>
+<Echangeur Sortie="END" Nom="RONDEAU"/>
+</Direction>
+<Direction Nom="CHAMBERY" Liste="START;8;7;6;5;4;2;1;END">
+<Echangeur Sortie="START" Nom="RONDEAU"/>
+<Echangeur Sortie="8" Nom="PONT DE CLAIX - GRENOBLE LIBERATION"/>
+<Echangeur Sortie="7" Nom="ECHIROLLES CENTRE - VILLENEUVE"/>
+<Echangeur Sortie="6" Nom="EYBENS LES RUIRES - ALPEXPO"/>
+<Echangeur Sortie="5" Nom="EYBENS CENTRE"/>
+<Echangeur Sortie="4" Nom="ST-MARTIN-D'HERES CENTRE"/>
+<Echangeur Sortie="2" Nom="GIERES CENTRE - ST-MARTIN-D'HERES PERI"/>
+<Echangeur Sortie="1" Nom="ZI CHAMP ROMAN - DOMAINE UNIVERSITAIRE"/>
+<Echangeur Sortie="END" Nom="A 41"/>
+</Direction>
+</Axe>
+<Axe Nom="A 41">
+<Direction Nom="CHAMBERY" Liste="START;25;24.1;24c;24b;24a;23;22;END">
+<Echangeur Sortie="START" Nom="GRENOBLE"/>
+<Echangeur Sortie="25" Nom="MONTBONNOT"/>
+<Echangeur Sortie="24.1" Nom="VILLARD-BONNOT"/>
+<Echangeur Sortie="24c" Nom="BERNIN"/>
+<Echangeur Sortie="24b" Nom="BRIGNOUD - FROGES"/>
+<Echangeur Sortie="24a" Nom="CROLLES"/>
+<Echangeur Sortie="23" Nom="LE TOUVET"/>
+<Echangeur Sortie="22" Nom="PONTCHARRA"/>
+<Echangeur Sortie="END" Nom="MONTMELIAN"/>
+</Direction>
+<Direction Nom="GRENOBLE" Liste="START;22;23;24;25;26;27;END">
+<Echangeur Sortie="START" Nom="MONTMELIAN"/>
+<Echangeur Sortie="22" Nom="PONTCHARRA"/>
+<Echangeur Sortie="23" Nom="LE TOUVET"/>
+<Echangeur Sortie="24" Nom="CROLLES"/>
+<Echangeur Sortie="25" Nom="MONTBONNOT"/>
+<Echangeur Sortie="26" Nom="MEYLAN-EST"/>
+<Echangeur Sortie="27" Nom="MEYLAN-MI PLAINE"/>
+<Echangeur Sortie="END" Nom="GRENOBLE"/>
+</Direction>
+</Axe>
+<Axe Nom="A 49">
+<Direction Nom="VALENCE" Liste="START;11;10;9;8;7;6;END">
+<Echangeur Sortie="START" Nom="GRENOBLE"/>
+<Echangeur Sortie="11" Nom="TULLINS"/>
+<Echangeur Sortie="10" Nom="VINAY"/>
+<Echangeur Sortie="9" Nom="SAINT-MARCELLIN"/>
+<Echangeur Sortie="8" Nom="LA BAUME D'HOSTUN"/>
+<Echangeur Sortie="7" Nom="ROMANS SUR ISERE"/>
+<Echangeur Sortie="6" Nom="BOURG DE PEAGE"/>
+<Echangeur Sortie="END" Nom="VALENCE"/>
+</Direction>
+<Direction Nom="GRENOBLE" Liste="START;6;7;8;9;10;11;END">
+<Echangeur Sortie="START" Nom="VALENCE"/>
+<Echangeur Sortie="6" Nom="BOURG DE PEAGE"/>
+<Echangeur Sortie="7" Nom="ROMANS SUR ISERE"/>
+<Echangeur Sortie="8" Nom="LA BAUME D'HOSTUN"/>
+<Echangeur Sortie="9" Nom="SAINT-MARCELLIN"/>
+<Echangeur Sortie="10" Nom="VINAY"/>
+<Echangeur Sortie="11" Nom="TULLINS"/>
+<Echangeur Sortie="END" Nom="GRENOBLE"/>
+</Direction>
+</Axe>
+</Racine>
+
+
+
+

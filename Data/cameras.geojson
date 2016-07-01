@@ -1,0 +1,13 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "CODE": "RondeauNord", "LIBELLE": "Le Rondeau - Direction Lyon", "TYPE" : "CAM", "CAP": 0, "nsv": 1}, "geometry": { "type": "Point", "coordinates": [ 5.701174, 45.159519 ] } },
+{ "type": "Feature", "properties": { "CODE": "RondeauSud", "LIBELLE": "Le Rondeau - Direction Sisteron", "TYPE" : "CAM", "CAP": 180, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.700736, 45.157919 ] } },
+{ "type": "Feature", "properties": { "CODE": "RondeauEst", "LIBELLE": "Le Rondeau - Direction Chambéry", "TYPE" : "CAM", "CAP": 90, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.703468, 45.15861 ] } },
+{ "type": "Feature", "properties": { "CODE": "Champagnier", "LIBELLE": "Champagnier - Direction Grenoble", "TYPE" : "CAM", "CAP": 340, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.721667, 45.094263 ] } },
+{ "type": "Feature", "properties": { "CODE": "Vizille", "LIBELLE": "Vizille - Direction Grenoble", "TYPE" : "CAM", "CAP": 280, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.762113, 45.083516 ] } },
+{ "type": "Feature", "properties": { "CODE": "Eybens", "LIBELLE": "Eybens - Direction Lyon", "TYPE" : "CAM", "CAP": 220, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.74702, 45.156061 ] } },
+{ "type": "Feature", "properties": { "CODE": "Meylan", "LIBELLE": "Meylan - Direction Grenoble", "TYPE" : "CAM", "CAP": 195, "nsv": 1 }, "geometry": { "type": "Point", "coordinates": [ 5.7828, 45.203935 ] } },
+{ "type": "Feature", "properties": { "CODE": "PorteFrance", "LIBELLE": "Porte de France - Direction Lyon", "TYPE" : "CAM", "CAP": 0, "nsv": 0 }, "geometry": { "type": "Point", "coordinates": [ 5.717298, 45.194136 ] } }
+]
+}

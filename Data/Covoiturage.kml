@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Covoiturage.kml</name>
+	<Style id="sn_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sn_ylw-pushpin0">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sn_ylw-pushpin1">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>997f00aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin3</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sn_ylw-pushpin2">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>997f00aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin2</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_ylw-pushpin">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sh_ylw-pushpin0">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>997f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sh_ylw-pushpin1">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sn_ylw-pushpin3">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<Style id="sh_ylw-pushpin2">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>7f7f00aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin1">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin2</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin3</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="msn_ylw-pushpin2">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_ylw-pushpin3">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>997f00aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin3">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin1</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Folder>
+		<name>Mes lieux préférés</name>
+		<open>1</open>
+		<Style>
+			<ListStyle>
+				<listItemType>check</listItemType>
+				<ItemIcon>
+					<state>open</state>
+					<href>:/mysavedplaces_open.png</href>
+				</ItemIcon>
+				<ItemIcon>
+					<state>closed</state>
+					<href>:/mysavedplaces_closed.png</href>
+				</ItemIcon>
+				<bgColor>00ffffff</bgColor>
+				<maxSnippetLines>2</maxSnippetLines>
+			</ListStyle>
+		</Style>
+		<Placemark>
+			<name>Covoiturage - Pays Voironnais</name>
+			<description><![CDATA[Des parkings de rabattement sont à votre disposition pour laisser votre véhicule et poursuivre votre trajet à plusieurs :
+
+1/ Les parkings de Plan Menu sur la commune de Coublevie :
+
+- le parking de rabattement à coté du stade
+
+- le parking à proximité des terrains de tennis situé 50 mètres plus bas.
+
+2/ Le parking à proximité de l’échangeur de Champfeuillet.
+
+3/ Le parking-relais "Briève Dauphine" à Rives est gratuit et peut être utilisé pour le covoiturage.
+
+
+Site de covoiturage du Pays Voironnais :
+
+<a href="http://www.covoiturage-paysvoironnais.com/" target="_blank">http://www.covoiturage-paysvoironnais.com/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin1</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.555771746030242,45.36400248692436,0 5.59290231252604,45.31087613909602,0 5.623605074902589,45.32146973124079,0 5.589215132125938,45.37508235447349,0 5.555771746030242,45.36400248692436,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Crolles</name>
+			<description><![CDATA[Dans le cadre du développement des transports alternatifs, la commune aménage des parkings de covoiturage dotés d'une signalétique adaptée et d'abris vélos.
+
+<img src="http://www.stationmobile.fr/images/covoiturage/covoiturage_crolles.jpg"/>
+
+Le plus important (41 places) est situé à proximité du parking de Casino, dans une zone stratégique, près de l’arrêt de car du Raffour et à l’entrée de Crolles. 
+Le parking des Clapisses dispose de 34 places de stationnement. 
+Celui du gymnase Léo Lagrange dispose 18 places. 
+Enfin, 9 places sont réservées sur le parking du Lotissement Le Coteau. 
+
+Pas de site de covoiturage local, vous pouvez utiliser les sites départementaux ou régionaux :
+
+<a href="http://www.stationmobile.fr/se-deplacer-en-voiture/covoiturage/annuaire-des-sites-de-covoiturage" target="_blank">Annuaire des sites de covoiturage</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin0</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.897148139149191,45.30099424034822,0 5.869166351186365,45.27838901501455,0 5.88841413058293,45.26896330974594,0 5.913280216267019,45.29403760131644,0 5.897148139149191,45.30099424034822,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Plateau des Petites Roches</name>
+			<description><![CDATA[Site de covoiturage du plateau des Petites Roches :
+<a href="http://covoiturage.grand-tetras.org/" target="_blank">http://covoiturage.grand-tetras.org/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin3</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.854277775402121,45.29194564566666,0 5.863298473405152,45.28817741058583,0 5.895160003630735,45.31396089167894,0 5.885383819830084,45.31655174504616,0 5.854277775402121,45.29194564566666,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Polygone Scientifique</name>
+			<description><![CDATA[Site de covoiturage depuis et vers la presqu' île :
+<a href="http://covoituragecaesug.com/polygone/" target="_blank">http://covoituragecaesug.com/polygone/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.705246016491403,45.19599494931262,0 5.710360857699019,45.19954694086829,0 5.693610585583439,45.20941152278454,0 5.688236174102528,45.20746891993873,0 5.705246016491403,45.19599494931262,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Domaine Universitaire</name>
+			<description><![CDATA[Site de covoiturage depuis et vers le campus :
+<a href="http://covoituragecaesug.com/campus/" target="_blank">http://covoituragecaesug.com/campus/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.757379965094334,45.19492564132192,0 5.758830175147038,45.18817942372725,0 5.779594311062192,45.18972076330886,0 5.776813387871068,45.19594184514032,0 5.757379965094334,45.19492564132192,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - St-Martin D&apos;Uriage</name>
+			<description><![CDATA[Site de covoiturage de St-Martin D'Uriage :
+<a href="http://www.uriage-covoiturage.net/" target="_blank">http://www.uriage-covoiturage.net/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin1</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.833535340570577,45.1539972680325,0 5.837001440285681,45.14612237215717,0 5.857143266041611,45.1468504081796,0 5.852480234020538,45.15401632223054,0 5.833535340570577,45.1539972680325,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Quaix en Chartreuse</name>
+			<description><![CDATA[Site de covoiturage de Quaix en Chartreuse :
+<a href="http://quaixcovoiturage.free.fr/" target="_blank">http://quaixcovoiturage.free.fr/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin1</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.716135561453619,45.26123160956978,0 5.716432355365486,45.25162548118617,0 5.726404877262259,45.25142134225689,0 5.724564888190653,45.2606789765908,0 5.716135561453619,45.26123160956978,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Sud Grenoblois</name>
+			<description><![CDATA[Le parking-relais "Chantefeuille" à Vizille est gratuit et peut être utilisé pour le covoiturage.
+
+Site de covoiturage du Sud Grenoblois :
+
+<a href="http://www.covoiturage-sud-grenoblois.fr/" target="_blank">http://www.covoiturage-sud-grenoblois.fr/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin1</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.764868616053535,45.03878211306595,0 5.780771677450876,45.0844650601396,0 5.676125779098431,45.1007061866153,0 5.65911801570679,45.0562520335203,0 5.764868616053535,45.03878211306595,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Sud Grésivaudan</name>
+			<description><![CDATA[Site de covoiturage du Sud Grésivaudan :
+
+<a href="http://covoiturage.sud-gresivaudan.org/" target="_blank">http://covoiturage.sud-gresivaudan.org/</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin1</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.260925167377555,45.12912688954337,0 5.317774039028533,45.10615102069807,0 5.449898880156853,45.20235409834037,0 5.395787403213084,45.22270863472721,0 5.260925167377555,45.12912688954337,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>Covoiturage - Plateau du Vercors</name>
+			<description><![CDATA[Le parking situé à Sassenage sur la route menant au Vercors, à proximité du rond point Jean Prévost peut accueillir 83 véhicules.
+
+Pas de site de covoiturage local, vous pouvez utiliser les sites départementaux ou régionaux :
+
+<a href="http://www.stationmobile.fr/se-deplacer-en-voiture/covoiturage/annuaire-des-sites-de-covoiturage" target="_blank">Annuaire des sites de covoiturage</a>]]></description>
+			<styleUrl>#msn_ylw-pushpin2</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							5.503322160848758,45.07441985825859,0 5.567624264644118,45.06731651973495,0 5.608541293192298,45.17988639448699,0 5.538477439219189,45.18610664420704,0 5.503322160848758,45.07441985825859,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

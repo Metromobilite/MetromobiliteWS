@@ -29,57 +29,49 @@ var main = require('./index');
 var polyline = require('./polyline');
 var dyn = require('./dynWs');
 
-global.tronconsP={"type": "FeatureCollection", "features": []};
+global.vhP={"type": "FeatureCollection", "features": []};
+
 exports.routes = [
 	{
 		method: 'get',
-		path: '/api/troncons/:format',
-		handler: getTroncons,
+		path: '/api/vh/:format',
+		handler: getVh,
 		meta:{
-			description:'La geometrie des troncons routiers en geojson ou en encoded polyline.'
+			description:'La geometrie des axes de la viabilité hivernale en geojson ou en encoded polyline.'
 		},
 		groupName: 'Référentiel',
 		cors:true,
+		private:true,
 		validate:{
 			params:{
 				format:Joi.string().valid('json','poly')
-			},
-			query:{
-				niveau:Joi.string().valid('0','1','2')
 			}
 		}
 	}
 ];
 exports.initRef = function(type){
-	global.tronconsP.features=[];
+	global.vhP.features=[];
 	global.ref[type].features.forEach(function (feature,index){
-		if(typeof(feature.properties.id)=='undefined') feature.properties.id = feature.properties.CODE;
+		if(typeof(feature.properties.id)=='undefined') feature.properties.id = feature.properties.code;
 
 		//version poly
 		var p = JSON.parse(JSON.stringify( feature.properties));//résoud les problemes de copy par pointeur
-		global.tronconsP.features.push({properties:p});
-		global.tronconsP.features[index].properties.shape = polyline.fromGeoJSON(global.ref[type].features[index],5);
+		global.vhP.features.push({properties:p});
+		global.vhP.features[index].properties.shape = polyline.fromGeoJSON(global.ref[type].features[index],5);
 	});
 	
 	console.log(type+' loaded, total : '+global.ref[type].features.length);	
 }
 
-// http://data.metromobilite.fr/api/troncons/json
-// http://data.metromobilite.fr/api/troncons/poly
-async function getTroncons(ctx,format) {
+async function getVh(ctx) {
 	try {
 		var format = ctx.request.params.format;
-		var features = [];
-		if (format=='json') features = global.ref['trr'].features;
-		else if(format=='poly') features = global.tronconsP.features;
-
-		var params = querystring.parse(ctx.querystring);
-		var poiTyped={"type": "FeatureCollection", "features": []};
-		poiTyped.features = features.filter(function(f){
-			return (!params.niveau || f.properties.NIVEAU == params.niveau);
-		});
-		ctx.body = poiTyped;
+		if(format == 'json'){
+			ctx.body = global.ref['vh'];
+		} else if (format == 'poly'){
+			ctx.body = global.vhP;
+		}
 	} catch(e){
-		dumpError(e,'trr.getTroncons');
+		dumpError(e,'/api/vh/:format');
 	}
 }

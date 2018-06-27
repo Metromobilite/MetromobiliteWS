@@ -20,65 +20,76 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // *
 
+
 // dependence du module otpHoraires pour les données temps reel du reseau urbain (reseau primaire)
-var kRequest = require('koa-request');
+const Joi = require('koa-joi-router').Joi;
+var axios = require('axios');
 
 var main = require('./index');
 var otpHoraires = require('./otpHoraires');
 
 var urlSEM,keySEM;
 
-exports.getStatique = function *() {
-	var config = main.getConfig();
-	urlSEM = config.plugins.otpHoraires.dependencies.horairesSEM.url;
-	keySEM = config.plugins.otpHoraires.dependencies.horairesSEM.key;
-	global.etatsServeurs['SEM']=false;
-	global.etatsServeurs['lastFailSEM']=false;
-	yield exports.test();
+exports.routes = [];
+
+exports.init = async function (config) {
+	try {
+		urlSEM = config.plugins.otpHoraires.dependencies.horairesSEM.url;
+		keySEM = config.plugins.otpHoraires.dependencies.horairesSEM.key;
+		global.liaisonsServeurs['SEM'] = { libelle:'Cityway Tag', lifecycle:otpHoraires.NOT_INITIALIZED };
+		global.etatsServeurs['SEM']=false;
+		global.etatsServeurs['lastFailSEM']=false;
+	
+		main.eventEmitter.on('otpLoaded', async function (evt) {
+			getStatique();
+		});	
+	} catch(e){
+		main.dumpError(e,'horairesSEM.init');
+	}
 }
-exports.initKoa = function (app,route) {
-	app.use(route.get('/api/gtfs-rt/SEM/trip-update', function *() {
-		try {
-			var url = main.getConfig().plugins.otpHoraires.dependencies.horairesSEM.tripUpdate;
-			var options = {url:url, timeout: 5000,encoding: null};
-			var res = yield kRequest.get(options);
-			this.body = res.body;
-		} catch(e){
-			main.dumpError(e);
-		}
-	}));
+
+async function getStatique() {
+	await exports.test();
 }
-exports.test = function *() {
+
+exports.test = async function () {
 	try {
 		if(global.etatsServeurs.lastFailSEM && global.etatsServeurs.lastFailSEM + 60000 > new Date().getTime()) {
 			return false;
 		}
-		var resp = yield kRequest.get({url:urlSEM+'/transport/v2/GetLocalities/json?true=true'+keySEM, timeout: 2000,json: true});
-		if(!!resp.body && resp.body.StatusCode == 200) {
-			if(global.etatsServeurs.SEM) 
+
+		var options = {method:'get', url:urlSEM+'/TimeTables/v1/GetNextStopHours/json?CalcMode=REALTIME&stopId=4193'+keySEM, timeout: 5000, responseType: 'json'};
+		if(main.isDebug()) console.log(options.url);
+		var res = await axios(options);
+		if (res.status!=200 || res.statusText!='OK' || !res.data) {
+			otpHoraires.changeEtatServeur('SEM',false);
+			console.error('ECHEC de horairesSEM.test code : '+(resp.data?resp.status:'???'));
+			console.error('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailSEM+60000).toLocaleTimeString());
+			return false;
+		} else {
+			if(global.etatsServeurs.SEM)
 				return true;
 			else {
 				otpHoraires.changeEtatServeur('SEM',true);
 				console.log('SEM Initialisé !');
 				return true;
 			}
-		} else {
-			otpHoraires.changeEtatServeur('SEM',false);
-			console.log('ECHEC de horairesSEM.test code : '+(resp.body?resp.body.StatusCode:'???'));
-			console.log('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailSEM+60000).toLocaleTimeString());
-			return false;
 		}
 	} catch(e){
 		otpHoraires.changeEtatServeur('SEM',false);
-		console.log('ECHEC de horairesSEM.test');
-		console.log('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailSEM+60000).toLocaleTimeString());
+		console.error('ECHEC de horairesSEM.test');
+		console.error('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailSEM+60000).toLocaleTimeString());
 		return false;
 	}
-};
+}
 exports.getOptions = function(idOtp) {
-	if(!!global.otp.stops[idOtp] && !!global.otp.stops[idOtp].id) {
-		return {url:urlSEM+'/TimeTables/v1/GetNextStopHours/json?CalcMode=REALTIME'+keySEM+'&stopId='+global.otp.stops[idOtp].id.split(':')[1], timeout: 5000,json: true};
-	} else 
+	//si on a pas de GTFS-RT SEM et que l'on connait l'arret
+	if(!(global.etatsServeurs.SEMGTFSActif && global.etatsServeurs.SEMGTFS) && !!global.otp.stops[idOtp] && !!global.otp.stops[idOtp].id) {
+		if(global.etatsServeurs.SEM)
+			return {url:urlSEM+'/TimeTables/v1/GetNextStopHours/json?CalcMode=REALTIME'+keySEM+'&stopId='+global.otp.stops[idOtp].id.split(':')[1], timeout: 5000,responseType: 'json',method:'get'};
+		else
+			return false;
+	} else
 		return false;
 }
 exports.isMyResponse = function(resp){
@@ -87,12 +98,10 @@ exports.isMyResponse = function(resp){
 exports.parseResponse = function(resp){
 	var res = [];
 	var now = new Date();
-	//var bPostMidnight = (now.getHours()< 3);
+
 	now.setHours(12,0,0,0);//midi
-	//-12h pour le jours de changement d'heure
 	now=new Date(now.getTime()-12*60*60*1000);
 	var serviceDay = now;
-	//if(bPostMidnight) {serviceDay.setHours(-24)};
 
 	for (var i=0 ; i < resp.Data.length ; i++) {
 		var l = resp.Data[i];
@@ -101,7 +110,7 @@ exports.parseResponse = function(resp){
 		for (var j=0 ; j < l.StopPassingTimeList.length ; j++) {
 			var t = l.StopPassingTimeList[j];
 			if (!patterns[t.JourneyPatternId]) {
-				patterns[t.JourneyPatternId] = { 
+				patterns[t.JourneyPatternId] = {
 					pattern : {
 						id : line+':'+t.JourneyPatternId,
 						desc : '',
@@ -111,30 +120,35 @@ exports.parseResponse = function(resp){
 					times :[]
 				};
 			}
-			
+
 			var realTime = (t.RealTime?t.RealTime:t.PassingTime)*60;
 			var code = 'SEM:'+l.StopPoint.ImportId.replace(/[a-zA-Z]/g ,"");
+			if(!global.otp.stops[code]) {
+				console.error('horaireSEM.parseResponse : '+code+' inconnu !');
+			}
 			var time = {
 				stopId:code,
 				stopName:global.otp.stops[code].name,
 				scheduledArrival:realTime,
-				scheduledDeparture:realTime,
+				scheduledDeparture:(t.StopId==t.LastStopId?null:realTime),//pas d'horaire de départ au terminus,
 				realtimeArrival:realTime,
-				realtimeDeparture:realTime,
+				realtimeDeparture:(t.StopId==t.LastStopId?null:realTime),//pas d'horaire de départ au terminus,
 				arrivalDelay:0,
 				departureDelay:0,
 				timepoint:true,
 				realtime:(t.RealTime?true:false),
 				serviceDay:serviceDay.getTime()/1000,
-				tripId:""
+				tripId:t.VehicleJourneyId
 			};
 			patterns[t.JourneyPatternId].times.push(time);
+			main.eventEmitter.emit('horairesSEMrequete',{time:time,line:line});
+			
 		}
 		for (var k=0 ; k < l.JourneyPatternList.length ; k++) {
 			var p = l.JourneyPatternList[k];
 			patterns[p.JourneyPatternId].pattern.desc = p.Direction.Destination;
 			patterns[p.JourneyPatternId].pattern.dir = p.Direction.Direction;
-			patterns[p.JourneyPatternId].pattern.shortDesc = p.Direction.Destination.substring(0,15);
+			patterns[p.JourneyPatternId].pattern.shortDesc = p.Direction.Destination.substring(0,15).toUpperCase();
 		}
 
 		for (var pa in patterns) {
@@ -142,4 +156,4 @@ exports.parseResponse = function(resp){
 		}
 	};
 	return res;
-};
+}

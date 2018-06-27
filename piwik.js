@@ -27,27 +27,41 @@ var pwk = require('piwik');
 
 var piwik,domain,siteId;
 
-exports.init = function *(config) {
+exports.init = async function (config) {
 	piwik = pwk.setup (config.plugins.piwik.url);
 	domain = config.plugins.piwik.domain;
 	siteId = config.plugins.piwik.siteId;
 }
-exports.initKoa = function (app,route) {
-	app.use(function* (next) {
-		try{
-			piwik.track (
-			  {
-				idsite:siteId,
-				url:domain+this.request.url,
-				action_name: this.request.url,
-				ua: this.request.header['user-agent'],
-				lang: this.request.header['accept-language']
-				//_cvar:       { '1': ['group', 'customer'] }
-			  }
-			);
-			yield next;
-		} catch(e){
-			main.dumpError(e,'Piwik');
-		}
+exports.initMiddleware = function (app) {
+	app.use(async (ctx, next) => {
+		await next();
+		track(ctx);
 	});
+}
+async function track(ctx){
+	try{
+		piwik.track (
+			{
+				idsite:siteId,
+				url:domain+ctx.request.url,
+				action_name: ctx.request.url,
+				ua: ctx.request.header['user-agent'],
+				lang: ctx.request.header['accept-language']
+				//_cvar:       { '1': ['group', 'customer'] }
+			},
+			callback
+		);
+	} catch(e){
+		main.dumpError(e,'Piwik');
+	}
+}
+var callback = function (err, data) {
+	if (err) {
+		if(err.message=='request failed') main.dumpError(err.error,'Piwik');
+		else if (err.message=='response invalid') main.dumpError(err.error,'Piwik');
+		else if (err.message=='http error') console.log(err.body);
+		else if (err.message=='api error') console.log(err.text);
+		else if (err.message=='track failed') console.log(err.data);
+	}
+	else if(data && data.tracked != 1) console.log(data); //TODO voir pourquoi autant d'erreurs
 }

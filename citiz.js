@@ -22,23 +22,33 @@
 
 // module pour la mise a disposition des données statiques des voitures en autopartage citelib
 
-var request = require('request');
-var kRequest = require('koa-request');
+var axios = require('axios');
+var fs = require('fs');
 var co = require('co');
+var turf = require('@turf/turf');
 var dyn = require('./dynWs');
 var main = require('./index');
 
 exports.type='citelib';
 
-exports.init = function *() {
-	//co(function *(){
-		var config = main.getConfig();
-		var url = config.plugins.citiz.url;
+exports.init = async function (config) {
 		
-		var resp = yield kRequest.get({url:url,timeout: 50000});
-		resp.body = JSON.parse(resp.body);
-		if (resp.body) {
-			resp.body.forEach(function (s,index) {
+		var data = fs.readFileSync(config.dataPath+config.dataFilter, 'utf8');
+		var rectangle = JSON.parse(data);
+		var res;
+		try{
+			res = await axios({
+				method:'get',
+				url:config.plugins.citiz.url, 
+				timeout: 50000,
+				responseType: 'json'
+			});
+		} catch (e) {
+			main.dumpError(e,'citiz.init');
+		}
+		if (res && res.data && Array.isArray(res.data)) {
+			global.ref[exports.type]={ type: 'FeatureCollection', features: []};
+			res.data.forEach(function (s,index) {
 				var f = {
 					type: 'Feature',
 					properties: {
@@ -53,49 +63,15 @@ exports.init = function *() {
 						coordinates: [s.gpsLongitude,s.gpsLatitude]
 					}
 				};
-				global.poi.features.push(f);
+				if(turf.inside(f, rectangle.features[0])) global.ref[exports.type].features.push(f);
 			});
 			if (!config.types[exports.type]) config.types[exports.type]={"find":"Nom de la station"};
 			
-			console.log(exports.type+' loaded, total : '+resp.body.length+' elements (+'+global.poi.features.length+')');
+			console.log(exports.type+' loaded, total : '+global.ref[exports.type].features.length);
 
 		} else {
 			console.log('ECHEC du statique citiz');
 		}
 
-	//}).catch(main.dumpError);
-	return false;
-}
-exports.getDynamique = function() {
-	co(function *(){
-		var features = {};
-		var tasks = [];
-		var tasksRes = [];
-
-		/*var resAvailableCOMS = yield kRequest.get({url:main.getConfig().url.hamoComsAvail, timeout: 5000});
-		var resAvailableIRoad = yield kRequest.get({url:main.getConfig().url.hamoIRoadAvail, timeout: 5000});
-
-		resAvailableCOMS.body = JSON.parse(resAvailableCOMS.body);
-		resAvailableCOMS.body.available_stations.forEach(function (s,index) {
-			if(!features[s.station_id]) features[s.station_id]={properties:{type:'hamo',code:'E'+s.station_id,time:new Date().getTime()}};
-			features[s.station_id].properties.comsAvailable=s.available_service;
-		});
-		resAvailableIRoad.body = JSON.parse(resAvailableIRoad.body);
-		resAvailableIRoad.body.available_stations.forEach(function (s,index) {
-			if(!features[s.station_id]) features[s.station_id]={properties:{type:'hamo',code:'E'+s.station_id}};
-			features[s.station_id].properties.iRoadAvailable=s.available_service;
-		});
-		var r = {type: 'FeatureCollection', features:[] };
-		for(var f in features){
-			var url = main.getConfig().url.hamoDynDetail;
-			var res = yield kRequest.get({url:url+f, timeout: 50000});
-			res.body = JSON.parse(res.body);
-			features[f].properties.parking_space_free=res.body.station.parking_space_free;
-			features[f].properties.available_car=res.body.station.available_car;
-			r.features.push(features[f]);
-		}
-		dyn.ajouterDyn(r,true);*/
-
-	}).catch(main.dumpError);
 	return false;
 }

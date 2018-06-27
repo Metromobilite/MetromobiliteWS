@@ -22,44 +22,111 @@
 
 // module passe-plat pour requetes otp liées aux itineraires et isochrones
 
-var kRequest = require('koa-request');
+const Joi = require('koa-joi-router').Joi;
+var axios = require('axios');
 var main = require('./index');
 var querystring = require('querystring');
 
-var urlOtp;
+const urlOtp = main.getConfig().plugins.otpIti.url;
 
-exports.initKoa = function (app,route) {
-	var urlOtp = main.getConfig().plugins.otpIti.url;
-	
-	// http://data.metromobilite.fr/api/routers/default/plan?fromPlace=45.18022185817286,5.70988655090332&toPlace=45.18693699088948,5.754432678222655&time=1:01pm&date=05-17-2016&mode=BICYCLE&maxWalkDistance=750&arriveBy=false&wheelchair=false&showIntermediateStops=false
-	app.use(route.get('/api/routers/:router/plan', function *(router) {
-		try {
-			//var params = querystring.parse(this.querystring);
-
-			var options = {url:urlOtp+'/routers/'+router+'/plan?'+this.querystring, timeout: 10000,json: true};
-			if(!options) this.body = [];
-			else {
-				if(main.isDebug()) console.log(options.url);
-				var res = yield kRequest.get(options);
-				this.body = res.body;
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/routers/:router/plan',
+		handler: plan,
+		meta:{
+			description:'Calcul d\'itineraire.'
+		},
+		groupName: 'Outils',
+		cors:true,
+		validate:{
+			params:{
+				router:Joi.string().valid('default')
 			}
-		} catch(e){
-			main.dumpError(e,'/api/routers/'+router+'/plan');
 		}
-	}));
-	//http://data.metromobilite.fr/api/routers/default/isochrone?algorithm=recursiveGrid&fromPlace=45.18258096098725,5.7261478359375&date=2016/05/10&time=08:00:00&maxWalkDistance=1000&mode=BICYCLE&precisionMeters=200&cutoffSec=600&cutoffSec=1200&cutoffSec=1800&cutoffSec=2400
-	app.use(route.get('/api/routers/:router/isochrone', function *(router) {
-		try {
-			var options = {url:urlOtp+'/routers/'+router+'/isochrone?'+this.querystring, timeout: 50000,json: true};
-			if(!options) this.body = [];
-			else {
-				if(main.isDebug()) console.log(options.url);
-				var res = yield kRequest.get(options);
-				this.body = res.body;
+	},
+	{
+		method: 'get',
+		path: '/api/routers/:router/isochrone',
+		handler: isochrone,
+		meta:{
+			description:'Isochrones.'
+		},
+		groupName: 'Outils',
+		cors:true,
+		private:true,
+		validate:{
+			params:{
+				router:Joi.string().valid('default')
 			}
-		} catch(e){
-			main.dumpError(e,'/api/routers/'+router+'/isochrone');
 		}
-	}));
+	},
+	{
+		method: 'get',
+		path: '/api/routers/:router/serverinfo',
+		handler: serverinfo,
+		meta:{
+			description:'Infos sur le calculateur d\'itineraire.'
+		},
+		groupName: 'Outils',
+		cors:true,
+		validate:{
+			params:{
+				router:Joi.string().valid('default')
+			}
+		}
+	}
+];
 
+// http://data.metromobilite.fr/api/routers/default/plan?fromPlace=45.18022185817286,5.70988655090332&toPlace=45.18693699088948,5.754432678222655&time=1:01pm&date=05-17-2016&mode=BICYCLE&maxWalkDistance=750&arriveBy=false&wheelchair=false&showIntermediateStops=false
+async function plan(ctx) {
+	try {
+		var router = ctx.request.params.router;
+		var options = {method:'get', url:urlOtp+'/routers/'+router+'/plan?'+ctx.querystring, timeout: 10000, responseType: 'json'};
+		if(main.isDebug()) console.log(options.url);
+		var res = await axios(options);
+		if (res.status!=200 || res.statusText!='OK' || !res.data) {
+			console.error('otpIti : Erreur de requete plan, status : ' + res.status + ' Message : ' + res.statusText);
+			ctx.body = {};
+		} else {
+			ctx.body = res.data;
+		}
+		
+	} catch(e){
+		main.dumpError(e,'otpIti.plan');
+	}
+}
+//http://data.metromobilite.fr/api/routers/default/isochrone?algorithm=recursiveGrid&fromPlace=45.18258096098725,5.7261478359375&date=2016/05/10&time=08:00:00&maxWalkDistance=1000&mode=BICYCLE&precisionMeters=200&cutoffSec=600&cutoffSec=1200&cutoffSec=1800&cutoffSec=2400
+async function isochrone(ctx) {
+	try {
+		var router = ctx.request.params.router;
+		var options = {method:'get', url:urlOtp+'/routers/'+router+'/isochrone?'+ctx.querystring, timeout: 50000, responseType: 'json'};
+		if(main.isDebug()) console.log(options.url);
+		var res = await axios(options);
+		if (res.status!=200 || res.statusText!='OK' || !res.data) {
+			console.error('otpIti : Erreur de requete isochrone, status : ' + res.status + ' Message : ' + res.statusText);
+			ctx.body = {};
+		} else {
+			ctx.body = res.data;
+		}
+	} catch(e){
+		main.dumpError(e,'otpIti.isochrone');
+	}
+}
+//http://data.metromobilite.fr/api/routers/default/serverinfo
+async function serverinfo(ctx) {
+	try {
+		var router = ctx.request.params.router;
+		var options = {method:'get', url:urlOtp, timeout: 10000, responseType: 'json'};
+		if(main.isDebug()) console.log(options.url);
+		var res = await axios(options);
+		if (res.status!=200 || res.statusText!='OK' || !res.data) {
+			console.error('otpIti : Erreur de requete serverinfo, status : ' + res.status + ' Message : ' + res.statusText);
+			ctx.body = {};
+		} else {
+			ctx.body = res.data;
+		}
+	} catch(e){
+		main.dumpError(e,'otpIti.serverinfo');
+	}
 }

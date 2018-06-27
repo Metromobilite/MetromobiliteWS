@@ -23,27 +23,77 @@
 // generation d'un flux GTFS-RT Alert a partir des données evenement reçues dans le module dynWs
 
 var GtfsRealtimeBindings = require('gtfs-realtime-bindings');
-var route = require('koa-route');
-var kRequest = require('koa-request');
-var querystring = require('querystring');
+const Joi = require('koa-joi-router').Joi;
 var main = require('./index');
-var config;
-global.alerts=null;
 
-exports.updateAlerts = function() {
-	var FeedMessage = GtfsRealtimeBindings.FeedMessage;
-	var content = {
-		header :{
-			gtfs_realtime_version: "1.0",
-			incrementality: 'FULL_DATASET',
-			timestamp: Math.floor(new Date().getTime()/1000)
+global.alerts={};
+
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/gtfs-rt/alerts/:agencyId',
+		handler: getGtfsRtAlerts,
+		meta:{
+			description:'Evenements de transport en commun au format GTFS-RT Alerts.'
 		},
-		entity :[]
-	};
+		groupName: 'Temps réel',
+		cors:true,
+		private:true,
+		validate:{
+			params:{
+				agencyId:Joi.string().alphanum()
+			}
+		}
+	}
+]
+
+exports.init = async function (config) {
+	main.eventEmitter.on('updateDynData', function (evt) {
+		if(evt.type=='evtTC') updateAlerts();
+	});
+}
+exports.initDynamique = function() {
+	updateAlerts();
+}
+async function getGtfsRtAlerts(ctx){
+	try {
+		var agencyId = ctx.request.params.agencyId;
+		var FeedMessage = GtfsRealtimeBindings.FeedMessage;
+		if(!global.alerts[agencyId]) {
+			ctx.body = new FeedMessage ({
+				header :{
+					gtfs_realtime_version: "1.0",
+					incrementality: 'FULL_DATASET',
+					timestamp: Math.floor(new Date().getTime()/1000)
+				},
+				entity :[]
+			}).toBuffer();
+		} else {
+			ctx.body =  global.alerts[agencyId];
+		}
+		
+	} catch(e){
+		main.dumpError(e,'getGtfsRtAlerts');
+	}
+}
+function updateAlerts() {
+	var FeedMessage = GtfsRealtimeBindings.FeedMessage;
+
+	var contents = {};
 	for(e in global.dyn['evtTC']){
 		if (global.dyn['evtTC'][e].listeLigneArret) {
-			var tabTexte = global.dyn['evtTC'][e].texte.split('|');
 			var agency = global.dyn['evtTC'][e].listeLigneArret.split('_')[0];
+			if(!contents[agency]){
+				contents[agency] = {
+					header :{
+						gtfs_realtime_version: "1.0",
+						incrementality: 'FULL_DATASET',
+						timestamp: Math.floor(new Date().getTime()/1000)
+					},
+					entity :[]
+				};
+			}
+			var tabTexte = global.dyn['evtTC'][e].texte.split('|');
 			var route = global.dyn['evtTC'][e].listeLigneArret.replace('_',':');
 			if (global.otp.routes[global.dyn['evtTC'][e].listeLigneArret.replace('_',':')])
 				route = global.otp.routes[route].id;
@@ -53,15 +103,19 @@ exports.updateAlerts = function() {
 			var dateiso = date[2]+'-'+date[1]+'-'+date[0]+'T'+heure;
 			var timeDeb = new Date(dateiso).getTime();
 			
-			date = global.dyn['evtTC'][e].dateFin.split(' ')[0].split('/');
-			heure = global.dyn['evtTC'][e].dateFin.split(' ')[1];
-			dateiso = date[2]+'-'+date[1]+'-'+date[0]+'T'+heure;
-			var timeFin = new Date(dateiso).getTime();
-			
-			content.entity.push({
+			var active_period={ start: Math.floor(timeDeb/1000) }
+
+			if(global.dyn['evtTC'][e].dateFin != '31/12/2050 23:59') {
+				date = global.dyn['evtTC'][e].dateFin.split(' ')[0].split('/');
+				heure = global.dyn['evtTC'][e].dateFin.split(' ')[1];
+				dateiso = date[2]+'-'+date[1]+'-'+date[0]+'T'+heure;
+				var timeFin = new Date(dateiso).getTime();
+				active_period.end = Math.floor(timeFin/1000);
+			}
+			contents[agency].entity.push({
 				id: e,
 				alert :{
-					active_period :[{ start: Math.floor(timeDeb/1000), end: Math.floor(timeFin/1000) }],
+					active_period :[active_period],
 					informed_entity :[{ agency_id: agency, route_id: route.split(':')[1], route_type: null, trip: null, stop_id: null
 					}],
 					//cause: 1,
@@ -85,17 +139,11 @@ exports.updateAlerts = function() {
 			});
 		}
 	}
-	var alerts = new FeedMessage (content);
-	global.alerts = alerts.toBuffer();
-};
-
-exports.initKoa = function (mainApp,mainRoute) {
-	global.alerts=exports.updateAlerts();
-	mainApp.use(route.get('/api/gtfs-rt/alerts', function *() {
-		try {
-			this.body =  global.alerts;
-		} catch(e){
-			main.dumpError(e);
+	for (var agency in contents) {
+		if(!global.alerts[agency]){
+			var alerts = new FeedMessage (contents[agency]);
+			global.alerts[agency] =  alerts.toBuffer();
 		}
-	}));
-}
+	}
+
+};

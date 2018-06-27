@@ -26,46 +26,79 @@
 var main = require('./index');
 var querystring = require('querystring');
 var stream = require('koa-stream');
-var range = require('koa-range');
+const Joi = require('koa-joi-router').Joi;
 
-exports.initKoa = function (app,route) {
-	
-	app.use(range);
-	// * http://data.metromobilite.fr/api/cam/time?name=RondeauNord.mp4
-	// * http://localhost:8082/api/cam/time?name=RondeauNord.mp4
-	app.use(route.get('/api/cam/time', function *() {
-		try {
-			var params = querystring.parse(this.querystring);
-			
-			if (global.dynCam[params.name])
-				this.body = global.dynCam[params.name].time;
-			else
-				this.body = '0';
-			
-		} catch(e){
-			main.dumpError(e,'/api/cam/time');
-		}
-	}));
-	
-	// * http://data.metromobilite.fr/api/cam/video?name=RondeauNord.mp4
-	// * http://localhost:8082/api/cam/video?name=RondeauNord.mp4
-	app.use(route.get('/api/cam/video', function *() {
-		try {
-			var params = querystring.parse(this.querystring);
-			
-			
-			if (global.dynCam[params.name]) {
-				stream.buffer(this, global.dynCam[params.name].video, 'video/mp4', {allowDownload: true});
-				this.set('Content-Type', 'video/mp4');
-				this.set('Content-Length', global.dynCam[params.name].time);
-				this.body = global.dynCam[params.name].video;
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/cam/time',
+		handler: getCamTime,
+		meta:{
+			description:'L\'heure de la webcam.'
+		},
+		groupName: 'Temps réel',
+		cors:true,
+		private:true,
+		validate:{
+			query:{
+				name:Joi.string(),
+				key:Joi.number()
 			}
-			else {
-				this.body = '';
-			}
-			
-		} catch(e){
-			main.dumpError(e,'/api/cam/video');
 		}
-	}));
+	},
+	{
+		method: 'get',
+		path: '/api/cam/video',
+		handler: getCamVideo,
+		meta:{
+			description:'La video de la webcam.'
+		},
+		groupName: 'Temps réel',
+		cors:true,
+		private:true,
+		validate:{
+			query:{
+				name:Joi.string(),
+				key:Joi.number()
+			}
+		}
+	}
+];
+
+// * http://data.metromobilite.fr/api/cam/time?name=RondeauNord.mp4
+// * http://localhost:3000/api/cam/time?name=RondeauNord.mp4
+async function getCamTime(ctx) {
+	try {
+		var params = querystring.parse(ctx.querystring);
+		
+		if (global.dynCam[params.name])
+			ctx.body = global.dynCam[params.name].time;
+		else
+			ctx.body = '0';
+		
+	} catch(e){
+		main.dumpError(e,'webcam.getCamTime');
+	}
+}
+
+// * http://data.metromobilite.fr/api/cam/video?name=RondeauNord.mp4
+// * http://localhost:3000/api/cam/video?name=RondeauNord.mp4
+async function getCamVideo(ctx) {
+	try {
+		var params = querystring.parse(ctx.querystring);
+		
+		
+		if (global.dynCam[params.name]) {
+			stream.buffer(ctx, global.dynCam[params.name].video, 'video/mp4', {allowDownload: true});
+			ctx.set('Content-Type', 'video/mp4');
+			ctx.set('Content-Length', global.dynCam[params.name].time);
+			ctx.body = global.dynCam[params.name].video;
+		}
+		else {
+			ctx.body = '';
+		}
+		
+	} catch(e){
+		main.dumpError(e,'webcam.getCamVideo');
+	}
 }

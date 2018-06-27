@@ -1,5 +1,5 @@
 // *
-// Metromobilit� is the mobile application of Grenoble Alpes M�tropole <http://www.metromobilite.fr/>.
+// Metromobilité is the mobile application of Grenoble Alpes Métropole <http://www.metromobilite.fr/>.
 // It provides all the information and services for your travels in Grenoble agglomeration.
 
 // Copyright (C) 2013
@@ -20,7 +20,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // *
 
-// module pour la distribution des tron�ons routiers departementaux (statique/dynamique non separable)
+// module pour la distribution de la viabilite hivernale des tronçons routiers 
 
 var CronJob = require('cron').CronJob;
 var axios = require('axios');
@@ -28,51 +28,47 @@ var polyline = require('./polyline');
 var dyn = require('./dynWs');
 var main = require('./index');
 
-exports.type='trrC38';
-//var urlC38,keyC38;
-/*exports.init = async function (config) {
-	//urlC38 = main.getConfig().plugins.trrC38.url;
-	//keyC38 = main.getConfig().plugins.trrC38.key;
-}*/
+exports.type='vhC38';
+//exports.init = async function () {}
+
 exports.initDynamique = function() {
-	var jobTrrC38 = new CronJob({
-		cronTime: '40 */6 * * * *',//tous les 6 minutes
+	var jobVhC38 = new CronJob({
+		cronTime: '10 */6 * * * *',//tous les 6 minutes
 		onTick: exports.getDynamique,
 		runOnInit:true,
 		start: true,
 		timeZone: "Europe/Paris"
 	});
 }
-//Recupere les troncon et le niveaux de service C38, et les formates
+//Recupere les tronçon et le niveaux de service C38, et les formates
 exports.getDynamique = async function() {
-	var url = main.getConfig().plugins.trrC38.url+'/traffic/v2/GetTrafficStatus/json?OperatorIds=12&OnlyPublished=true' + main.getConfig().plugins.trrC38.key;
+	var url = main.getConfig().plugins.vhC38.url+'/traffic/v2/GetWinterDrivings/json?OperatorIds=12&OnlyPublished=true' + main.getConfig().plugins.vhC38.key;
 	var res = await axios({url:url,timeout: 50000,responseType:'json',method:'get'});
 	if(res.status == 200 && res.data.Data) {
 		var t = new Date();
 		dyn.ajouterType(exports.type,translateC38Objet(res.data));
 	} else {
-		console.log('ECHEC des niveaux de service C38');
+		console.log('ECHEC des vh C38');
 	}
 	return false;
 }
 
 //converti les tronçons du format WKT au format encoded polyline
 function translateC38Objet(C38Objet) {
-	//var features = [];
 	var obj = {};
 	var t = new Date().getTime();
 	C38Objet.Data.forEach(function (data,index) {
-		if (data.Type != '0' && !!data.Shape) { //Type (string) = ['0:Unknow' or '1:Free' or '2:Heavy' or '3:Congested' or '4:Blocked'] .... idem Metro
+		if (data.Type != '0' && !!data.Shape) { //Type (string) =  [0:'Unknow' or 1:'Normal' or 2:'Tricky' or 3:'Difficult' or 4:'Impossible'] .... idem Metro
 			var code = exports.type+'_' + index;
 			obj[code]=[{shape:convertWKTToEncodedPolylineObjet(data.Shape), nsv_id:data.Type, time: t}];
+
 		}
 	});
-	
 	return obj;
 }
 function convertWKTToEncodedPolylineObjet(WKTObjet) {
 	var lines = [];
-	var rawObj = WKTObjet.replace('MULTILINESTRING ((','').replace('))','');
+	var rawObj = WKTObjet.replace('LINESTRING (','').replace(')','');
 	
 	rawObj.split('), (').forEach(function (lineString,indexLineString) {
 		var coordinates = [];

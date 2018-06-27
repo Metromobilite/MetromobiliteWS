@@ -22,23 +22,24 @@
 
 // module de communication avec la page expoit.html de visualisation des données dynamiques presentes dans le webservice
 
-var app = require('koa')();
-var cors = require('koa-cors');
+var Koa = require('koa');
+var app = new Koa();
+var cors = require('@koa/cors');
 var send = require('koa-send');
 var main = require('./index');
 var otpHoraires = require('./otpHoraires');
 var config;
 
 var options = {
-	origin: true,
-	methods: 'GET,HEAD,PUT,POST,DELETE'
+	allowMethods: 'GET,HEAD,PUT,POST,DELETE'
 }
 
 app.use(cors(options));
 
-app.use(function *(){
-  yield send(this, this.path, { root: __dirname + '/exploit' });
+app.use(async (ctx) => {
+	await send(ctx, ctx.path, { root: __dirname + '/exploit' });
 });
+
 var server = require('http').createServer(app.callback());
 var io = require('socket.io')(server,{ serveClient: true });
 
@@ -49,6 +50,13 @@ main.eventEmitter.on('updateDynData', function (evt) {
 main.eventEmitter.on('changeEtatServeur', function (data) {
 	io.emit('updateetatsServeursHoraires', data);
 });
+main.eventEmitter.on('changeEtatGtfsRt', function (data) {
+	io.emit('updateetatGtfsRt', data);
+});
+main.eventEmitter.on('liaisonsServeurs', function (data) {
+	io.emit('updateliaisonsServeurs', data);
+});
+
 
 io.on('connection', function(socket){
 	console.log('socket connected');
@@ -56,28 +64,42 @@ io.on('connection', function(socket){
 	socket.once('disconnect', function () {
 		console.log('socket disconnected');
 	});
-	io.emit('connect', 'Connecté !');
+	socket.emit('connect', 'Connecté !');
 
-	var data = {bDebug:main.isDebug()};
-	io.emit('debug', data);
-
+	socket.emit('debug', {bDebug:main.isDebug()});
+	socket.emit('SEMGTFSActif', {bActif:global.etatsServeurs.SEMGTFSActif});
+	socket.emit('forceTotemAtmo', {forceValue:global.totemAtmo.forceValue});
 
 	socket.on('getAll', function(type){
 		var res;
-		if(type=='etatsServeursHoraires') {
+		if(type=='liaisonsServeurs') {
+			res = {serveur:'tous',etat:global.liaisonsServeurs};
+		} else if(type=='etatsServeursHoraires') {
 			res = otpHoraires.getEtatsServeurs();
 		} else {
 			res = (global.dyn[type]?global.dyn[type]:{});
 		}
-		io.emit('update'+type, res);
+		socket.emit('update'+type, res);
 	});
 	socket.on('setDebug',function(debug){
 		main.setDebug(debug==true);
+		socket.broadcast.emit('debug', {bDebug:main.isDebug()});
 	});
+	socket.on('setSEMGTFSActif',function(bActif){
+		global.etatsServeurs.SEMGTFSActif=(bActif==true);
+		socket.broadcast.emit('SEMGTFSActif', {bActif:global.etatsServeurs.SEMGTFSActif});
+	});
+	socket.on('setForceTotemAtmo',function(valeur){
+		if(global.plugins.name['totemAtmo'] && global.plugins.name['totemAtmo'].forceValeur){
+			global.plugins.name['totemAtmo'].forceValeur(valeur);
+		}
+		io.emit('forceTotemAtmo', {forceValue:global.totemAtmo.forceValue});
+	});
+	
+	
 });
 
-exports.init = function(conf) {
-	config = conf;
+exports.init = async function (config) {
 	server.listen(config.portRT, function() {
 		console.log('Listening on http://localhost:'+config.portRT);
 	});

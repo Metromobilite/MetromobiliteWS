@@ -34,20 +34,53 @@
 // ce module contient des cas particuliers liés au module otpHoraires : 'pointArret' => les poteaux et 'arret' => les zones d'arret
 // le module findWs contient les recherches associées a ces données
 
+var turf = require('@turf/turf');
 var main = require('./index');
 var fs = require('fs');
 var querystring = require('querystring');
 var dyn = require('./dynWs');
 
-global.zones={};
-global.zonesOTP={};
-global.poteaux={};
 global.findText={"type": "FeatureCollection", "features": []};
-global.poi={"type": "FeatureCollection", "features": []};
 var findTypes = ['rue','lieux','arret'];
 
-exports.init = function *(config) {
+var bboxPolygonMetro;
+var bboxPolygonGresivaudan;
+var bboxPolygonVoironnais;
+exports.types=[];
+exports.init = async function (config) {
 	if( typeof(config.data)=='undefined') throw 'no data field in config.json';
+		
+	/*Préparation du filtrage sur les EPCI - Début*/
+	var file = config.plugins.points.comFile;
+	var data = fs.readFileSync(config.dataPath+file, 'utf8');
+	var communes = JSON.parse(data);
+	
+	var communesMetro={"type": "FeatureCollection", "features": []};
+	var communesGresivaudan={"type": "FeatureCollection", "features": []};
+	var communesVoironnais={"type": "FeatureCollection", "features": []};
+	
+	communesMetro.features = communes.features.filter(function(f){
+				return (String(f.properties.epci).indexOf('LaMetro')!=-1);
+		});
+	communesGresivaudan.features = communes.features.filter(function(f){
+				return (String(f.properties.epci).indexOf('LeGresivaudan')!=-1);
+		});
+	communesVoironnais.features = communes.features.filter(function(f){
+				return (String(f.properties.epci).indexOf('PaysVoironnais')!=-1);
+		});
+		
+	console.log('Communes loaded : '+communes.features.length+ ' Metro (' + communesMetro.features.length + '), Gresivaudan (' + communesGresivaudan.features.length + '), Voironnais (' + communesVoironnais.features.length + ')');
+
+	var bboxMetro = turf.bbox(communesMetro);
+	bboxPolygonMetro = turf.bboxPolygon(bboxMetro);
+	
+	var bboxGresivaudan = turf.bbox(communesGresivaudan);
+	bboxPolygonGresivaudan = turf.bboxPolygon(bboxGresivaudan);
+	
+	var bboxVoironnais = turf.bbox(communesVoironnais);
+	bboxPolygonVoironnais = turf.bboxPolygon(bboxVoironnais);
+
+	/*Préparation du filtrage sur les EPCI - Fin*/
 	
 	config.data.forEach(function (file,index){
 		try {
@@ -56,6 +89,7 @@ exports.init = function *(config) {
 			var type = file.type;
 			var json;
 			config.types[type]={"find":file.find};
+			exports.types.push(type);
 			var data = fs.readFileSync(config.dataPath+file.file, 'utf8');
 			json = JSON.parse(data);
 			parseFile(file, json,config);
@@ -63,24 +97,59 @@ exports.init = function *(config) {
 			main.dumpError(e,file.file);
 		}
 	});
+	
+	bboxPolygonMetro = null;
+	bboxPolygonGresivaudan = null;
+	bboxPolygonVoironnais = null;
+	delete bboxPolygonMetro;
+	delete bboxPolygonGresivaudan;
+	delete bboxPolygonVoironnais;	
 }
 
-exports.initKoa = function (app,route) {
+//Permet la suppression des doublons (ex dat)
+function getSignature(obj){
+    if(typeof(obj)==='undefined') return 'undefined';
+    var signature = '';
+    signature = JSON.stringify(obj.geometry);
 
+    return signature;
 }
 
 function parseFile(file,json,config) {
+
 	var type = file.type;
-	if(typeof(file.keep)!='undefined') {
-		json.features = json.features.filter(function(f){
-			return f.properties[file.keep.key]==file.keep.value;
-		});
-	}
+	var signaturesType = [];
+	
+	json.features = json.features.filter(function(f){
+
+		var bKeep = true;  
+		if(typeof(file.keep)!='undefined') {
+			bKeep = f.properties[file.keep.key]==file.keep.value;
+		}
+		//Suppression des doublons (ex dat)
+		var bDoublon = false;
+		if(file.dedupe) {
+			var signature = getSignature(f);
+			if (signaturesType.indexOf(signature)!=-1)
+				bDoublon = true;
+			else 
+				signaturesType.push(signature);
+		}
+		return (bKeep && !bDoublon);
+	});
+
 	if (json.features) {
 		json.features.forEach(function (feature,index){
-			//if(typeof(feature.properties.TYPE)!='undefined') feature.properties.type = feature.properties.TYPE;
+
 			if(typeof(feature.properties.type)=='undefined') feature.properties.type = type;
 			if(typeof(feature.properties.CODE)=='undefined') feature.properties.CODE = index;
+						
+			if((typeof(feature.geometry)!='undefined') && (feature.geometry.type)=='Point')  {
+				feature.properties.LaMetro = isInside('LaMetro',feature);
+				feature.properties.LeGresivaudan = isInside('LeGresivaudan',feature);
+				feature.properties.PaysVoironnais = isInside('PaysVoironnais',feature);
+			}
+						
 			if(typeof(feature.properties.id)=='undefined') feature.properties.id = feature.properties.CODE;
 			if (!config.types[feature.properties.type]) config.types[feature.properties.type]={"find":config.types[type].find};
 			var visible = (typeof(feature.properties.arr_visible)=='undefined'?feature.properties.ARR_VISIBLE:feature.properties.arr_visible);
@@ -89,101 +158,39 @@ function parseFile(file,json,config) {
 				var f = JSON.parse(JSON.stringify(feature));//résoud les problemes de copy par pointeur
 				global.findText.features.push(f);
 			}
-			if(type == 'pointArret') {
-				var cluster = feature.properties.ZONE.replace('_',':').toUpperCase();
-				if(!global.zones[cluster]) global.zones[cluster] = {poteaux:[]};
-				var code = feature.properties.CODE.replace('_',':');
-				if (cluster.substr(0,3) == 'C38' && global.zones[cluster].poteaux.length > 0) {// on fait une liste de poteaux pour le C38 car il supporte une requete multipoteaux
-					global.zones[cluster].poteaux[0] = global.zones[cluster].poteaux[0]+','+code;
-				} else {
-					global.zones[cluster].poteaux.push(code);
-				}
-				if(feature.properties.lgn) global.poteaux[code]={lgn:feature.properties.lgn.replace(/\_/g,':').split(',')};
-			}
-			if(type == 'arret' && feature.properties.arr_visible=='1') {
-				var f = {
-					"type": "Feature",
-					"properties": {
-						"CODE": feature.properties.CODE.replace('_',':'),
-						"LIBELLE": feature.properties.LIBELLE,
-						"COMMUNE": feature.properties.COMMUNE,
-						"type": "arr_visible",
-						"id": feature.properties.id.replace('_',':')
-					},
-					"geometry": {
-						"type": "Point",
-						"coordinates": [feature.geometry.coordinates[0],feature.geometry.coordinates[1]]
-					}
-				};
-				global.poi.features.push(f);
-			}
-			if(type == 'arret') {
-				global.zonesOTP[feature.properties.id.replace('_',':')] = feature.properties.CODE.split('_')[1];
-			}
+			
 		});
 	}
 	if( json.features && typeof(json.features[0].geometry)!='undefined') {
 		if(json.features[0].geometry.type == 'Point') {
-			global.poi.features=global.poi.features.concat(json.features);
-			console.log(type+' loaded, total : '+global.poi.features.length+' elements (+'+json.features.length+')');
+			global.ref[type]=json;
+			console.log(type+' loaded, total : '+global.ref[type].features.length);
 		}
+	}	
+}
+
+function isInside(epci,feature) {
+	switch(epci) {
+		
+		case 'LaMetro':
+			return turf.inside(feature, bboxPolygonMetro);
+		case 'LeGresivaudan':
+			return turf.inside(feature, bboxPolygonGresivaudan);
+		case 'PaysVoironnais':
+			return 	turf.inside(feature, bboxPolygonVoironnais);		
+		default :
+			return false;
 	}
 }
 
-exports.initTest = function (config) {	
-	var o = { "features": [] };
-	var iTime = (new Date()).getTime();
-	var sNsv = "";
-	var oMsg = { 
-		"PMV" : [
-			"|   |    metromobilite.fr |   |   TOUTES LES|   SOLUTIONS POUR|    SE DEPLACER|   $|    Dans les agences |    de mobilité|   |    on me conseille|    sur mes|    déplacements |   ",
-			"Voies sur berge ouvertes",
-			"RN 90"
-		]	
-	};	
-	
-	global.poi.features.forEach(function (f,index){
-		var code = f.properties.CODE; //|| f.properties.code;
-		if(code) {
-			switch(f.properties.type) {
-				case "PMV":
-					//fichier Json Lignes exemple :  { "properties": { "CODE": "GRE_PMV_1001", "MESSAGES": "XXX"}}							
-					o.features.push({"properties": { "type":"PMV", "code":f.properties.CODE, "time":iTime, "messages":oMsg.PMV[parseInt(Math.random() * 3)] } });
-					break;
-					
-				case "PME":
-				
-					// Q quantité véhicule par 6 minutes
-					// code ^gre = 180
-					// code ^dde = 400
-					// T taux d'occupation du capteur %
-					// 100
-					// V vitesse
-					// code ^gre = -1
-					// code ^dde = 100					
-				
-					o.features.push({"properties": { "type":"PME", "code":f.properties.CODE, "time":iTime, "libelle":f.properties.LIBELLE, "Q":parseInt(Math.random() * (/^gre/i.test(f.properties.CODE) ? 180 : 400)), "T": parseInt(Math.random() * 100), "V":	(/^gre/i.test(f.properties.CODE) ? (-1) : parseInt(Math.random() * 120))} });
-					break;
-
-				case "PAR":
-					// { "properties": { "code": "", "time": "", "type": "PAR|PKG", "dispo": "-1|nombrePlacesLibres", "nsv_id": "-1|niveauService" }}				
-					o.features.push({"properties": { "code":f.properties.CODE, "time":iTime, type:"PAR", "dispo":parseInt(Math.random() * f.properties.TOTAL), "nsv_id":parseInt(Math.random() * 5) } });
-					break;
-					
-				case "PKG":
-					// ne pas prendre les -1
-					// { "properties": { "code": "", "time": "", "type": "PAR|PKG", "dispo": "-1|nombrePlacesLibres", "nsv_id": "-1|niveauService" }}
-					o.features.push({"properties": { "code":f.properties.CODE, "time":iTime, type:"PKG", "dispo":parseInt(Math.random() * f.properties.TOTAL), "nsv_id":parseInt(Math.random() * 5) } });
-					break;
-					
-				default:
-					//console.log(f.properties.TYPE);
-					break;
-			}
-		}
-	});
-	
-	if (o.features.length) {
-		dyn.ajouterDyn(o);
-	}	
+exports.getPoints = function(types) {
+	var res = {type: 'FeatureCollection', features: []};
+	for(var i=0; i < types.length;i++){
+		var t = types[i];
+		if(!!global.ref[t]) 
+			res.features = res.features.concat(global.ref[t].features);
+		else
+			console.error('getPoints : '+t+' not found !');
+	}
+	return res;
 }

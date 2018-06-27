@@ -26,66 +26,61 @@
 //	indiceAtmoFake : vielles données dans futur format
 //	si on met le parametre appMetromobilite sur le type indiceAtmoFull on retourne l'indiceAtmoFake a la place de l'indiceAtmoFull
 
-var CronJob = require('cron').CronJob;
-var request = require('request');
-var main = require('./index');
-var dyn = require('./dynWS');
+//var CronJob = require('cron').CronJob;
+//var request = require('request');
+//var main = require('./index');
+//var dyn = require('./dynWS');
 
-main.eventEmitter.on('updateDynData', function (evt) {
+/*main.eventEmitter.on('updateDynData', function (evt) {
 	if (evt.type == 'indiceAtmo')
 		indiceAtmoFullFake();
-});
+});*/
 
 exports.initDynamique = function() {
-	var jobAtmo = new CronJob({
+	/*var jobAtmo = new CronJob({
 		cronTime: '00 01 * * * *',//toutes les minutes
 		runOnInit: true,
 		onTick: exports.getDynamique,
 		start: true,
 		timeZone: "Europe/Paris"
-	});
+	});*/
 }
 
 /**
  * charge les données atmo en mémoire
  */
-exports.getDynamique = function () {
+/*
+exports.getDynamique = async function () {
 	var url = main.getConfig().plugins.atmo.atmoBassinData;
 	request.get({url:url, timeout: 10000,json: true}, function(err,data) {
 		if(!err && data.body) {
 			var type = 'indiceAtmoFull';
 			data.body.type = type;
 			data.body.code = '1';
-			if(data.body.date_modification!=null) 
-				data.body.time = new Date(data.body.date_modification.date).getTime();
-			else
-				data.body.time = new Date().getTime();
-			
+			data.body.time = new Date().getTime();
 			var atmoFull = {type: 'FeatureCollection', features: [{ properties:data.body }]};
-			
 			atmoFull.features[0].properties.indice_exposition = atmoFull.features[0].properties.indice_exposition_sensible;
-
 			dyn.ajouterDyn(atmoFull);
 			
 		} else {
 			console.log('ECHEC des données Atmo : '+err.code);
 		}
 	});
-}
+}*/
 /**
  * override dynWS.getDyn function
  */
-exports.getDyn = function (type,params) {
+/*exports.getDyn = function (type,params) {
 	if (type == 'indiceAtmoFull' && params.appMetromobilite == 'true')
 		type = 'indiceAtmoFullFake';
 	return (!global.dyn[type]) ? {} : global.dyn[type];
-}
+}*/
 /**
  * data initialization for test mode
  * @param {Object} config
  */
+/*
 exports.initTest = function (config) {
-	
 	var iTime = (new Date()).getTime();
 	var oIndices = {
 		"tr": ["INFORMATION NON DISPONIBLE","FLUIDE","RALENTI","EMBOUTEILLAGE / CONGESTION","FERMÉ"],
@@ -104,13 +99,13 @@ exports.initTest = function (config) {
 				{"properties": {"code": "ITC1",  "type": "indiceTc", "indice": iTc}}
 			]};
 	dyn.ajouterDyn(o);
-}
+}*/
 
 
 /**
  * 
  */
-function indiceAtmoFullFake() {
+/*function indiceAtmoFullFake() {
 	if (!global.dyn['indiceAtmo']) return {};
 	var atmo = global.dyn['indiceAtmo']["1"][global.dyn['indiceAtmo']["1"].length-1];
 	var date = new Date(atmo.time).toISOString().substr(0,10);
@@ -118,14 +113,14 @@ function indiceAtmoFullFake() {
 	
 	var atmoFull = {
 		"type":"indiceAtmoFullFake",
-		"code":"ASC_1",
+		"code":"1",
 		"date":date,
 		"date_modification":null,
 		"dispositif_en_cours":(!!atmo.dispositif_en_cours?atmo.dispositif_en_cours:"Non disponible"),
 		"polluant_majoritaire":"Non disponible",
 		"indice_exposition":{},
-		"activation": (!!atmo.activation?atmo.activation:"Non disponible"),
-		"action": (!!atmo.action?atmo.action:"Non disponible"),
+		"activation": (!!atmo.activation?atmo.activation:{}),
+		"action": (!!atmo.action?atmo.action:{}),
 		"url_carte":main.getConfig().plugins.atmo.atmoImg + date.split('-')[0]+date.split('-')[1]+date.split('-')[2]+"_multi-polluant_reg.png",
 		"commentaire":(!!atmo.commentaire?atmo.commentaire:"Non disponible"),
 		"time":atmo.time};
@@ -136,10 +131,11 @@ function indiceAtmoFullFake() {
 	atmoFull = {type: 'FeatureCollection', features: [{ properties:atmoFull }]};
 	
 	dyn.ajouterDyn(atmoFull);
-}
+}*/
 /**
  * 
  */
+/*
 function getTexteIndice(indice, fake) {
 	switch(indice) {
 	case '1':
@@ -176,4 +172,4 @@ function getTexteIndice(indice, fake) {
 		texte='Indisponible';
 	}
 	return texte;
-}
+}*/

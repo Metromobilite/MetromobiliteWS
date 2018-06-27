@@ -1,7 +1,13 @@
 {
-	"port":"8082",
+	"port":"3000",
 	"portDyn":"8086",
 	"portRT":"8087",
+	"restrictedEndPoints" : [
+		"/api/ecn"
+	],
+	"allowedOrigins" : [
+		"metromobilite.fr"
+	],
 	"max_keep_dyn":"6",
 	"dataPath":"/outils/NodeJS/data/",
 	"dataFilter":"rectangle.geojson",
@@ -9,60 +15,91 @@
 		{"type":"arret","file":"Arrets.geojson","find":"LIBELLE"},
 		{"type":"lieux","file":"Lieux.geojson","find":"LIBELLE"},
 		{"type":"agenceM","file":"AgencesMobilite.geojson","find":"NOM"},
-		{"type":"citelibold","file":"citelib.geojson","find":"Nom de la station"},
 		{"type":"pointService","file":"PointsServices.geojson","find":"NOM"},
-		{"type":"dat","file":"dat.geojson","find":"ARRET"},
+		{"type":"dat","file":"dat.geojson","find":"ARRET","dedupe":true},
 		{"type":"depositaire","file":"Depositaires.geojson","find":"NOM"},
-		{"type":"PMV","file":"PMV.geojson","find":"LIBELLE"},
 		{"type":"pointArret","file":"PointArret.geojson","find":"LIBELLE"},
-		{"type":"PAR","file":"Parkings.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"PAR"}},
-		{"type":"PKG","file":"Parkings.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"PKG"}},
 		{"type":"MVA","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"AGENCE METRO-VELO"}},
 		{"type":"MVC","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"CONSIGNE METRO-VELO"}},
 		{"type":"AGENCE METRO-VELO","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"AGENCE METRO-VELO"}},
 		{"type":"CONSIGNE METRO-VELO","file":"Metrovelo.geojson","find":"LIBELLE","keep":{"key":"TYPE","value":"CONSIGNE METRO-VELO"}},
-		{"type":"CAM","file":"cameras.geojson","find":"LIBELLE"},
 		{"type":"rue","file":"rues.geojson","find":"LIBELLE"},
-		{"type":"PME","file":"pme.geojson"}
+		{"type":"autostop","file":"autostop.geojson"},
+		{"type":"covoiturage","file":"covoiturage.geojson"},
+		{"type":"poteauBIV","file":"poteauxSEM_biv.geojson"},
+		{"type":"recharge","file":"bornes_recharges.geojson"}
 	],
 	"plugins":{
 		"piwik":{
-			"url":"http://192.168.245.1/stats/piwik.php",
-			"domain":"http://mondomaine",
+			"url":"http://192.168.245.10:8080/stats/piwik.php",
+			"domain":"http://data.metromobilite.fr",
 			"siteId":"8"
 		},
-		"points":{},
-		"findWs":{},
+		"points":{
+			"comFile":"Communes.geojson"
+		},
+		"findWs":{
+			"file":"Echangeurs.xml"
+		},
 		"trr":{
 			"types":["trr"],
-			"file":"Troncons.geojson"
+			"_file":"Troncons.geojson"
 		},
 		"lines":{
+			"types":["ligne"],
 			"lineType":"lignesTypees",
 			"lineFile":"lignes.json",
-			"geomType":"ligne",
-			"geomFile":"LignesLight.geojson"
+			"_geomType":"ligne",
+			"_geomFile":"LignesLight.geojson"
 		},
 		"otpIti":{
+			"__url":"http://127.0.0.1:8080/otp",
 			"url":"http://192.168.245.9/otp"
 		},
 		"citiz":{
 			"url":"http://production.citiz.fr/public/fleet/stations/5"
 		},
+		"vh":{
+			"types":["vh"],
+			"_file":"vh.geojson"
+		},
+		"vhC38":{
+			"url":"https://tsvc.itiniserev2.cityway.fr/api",
+			"key":"&user_key=2f359a673db8504b1e4940b791fdb4d3"
+		},
 		"otpHoraires":{
+			"typeCluster":"arret",
+			"typeStop":"pointArret",
+			"codeParentStation":"CODE",
+			"nameParentStation":"LIBELLE",
+			"cityParentStation":"COMMUNE",
+			"pivotsFichesHoraires":"pivots.json",
 			"nbTripsStatique":4,
+			"numberOfDeparturesOtp":4,
 			"url":"http://192.168.245.9/otp",
+			"urlFicheHorairesTag":"http://www.tag.fr/ftp/fiche_horaires/fiche_horaires_2014/",
 			"dependencies":{
+				"otpPosition":{
+				},
 				"horairesSEM":{
 					"agency":"SEM",
-					"url":"http://private",
-					"key":"&key=CLE",
-					"tripUpdate":"http://private"
+					"url":"http://tag.tim.cityway.fr/WebServices/TransinfoService/api",
+					"key":"&key=******",
+					"tripUpdate":"http://tag.************.pb",
+					"filtredLines":["23","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","60","61","62","63","64","65","66","67","68","69","70","71"]
 				},
 				"horairesC38":{
 					"agency":"C38",
-					"url":"http://www.itinisere.fr/webServices/TransinfoService/api",
-					"key":"&user_key=CLE_PRIVEE"
+					"url":"https://******/api",
+					"key":"&user_key=**************"
+				},
+				"gtfsRtSEM":{}
+			},
+			"inactive_dependencies":{
+				"horairesC38":{
+					"agency":"C38",
+					"url":"https://*******/api",
+					"key":"&user_key=*************"
 				}
 			},
 			"stopLinks":{
@@ -71,22 +108,28 @@
 				"secondaryAgency":"C38"
 			}
 		},
-		"hamo":{
-			"hamoList":"https:private",
-			"hamoComsAvail":"https:private",
-			"hamoIRoadAvail":"https:private",
-			"hamoDynDetail":"https:private"
-		},
+		"otp":{},
+		"gtfsRtWs":{},
 		"dynWs":{},
 		"webcam":{},
 		"trrC38":{
-			"url":"http://www.itinisere.fr/webServices/TransinfoService/api",
-			"key":"&user_key=CLE_PRIVEE"
+			"url":"https:/***************/api",
+			"key":"&user_key=****************"
 		},
-		"atmo":{
-			"atmoBassinData":"http://bassingrenoblois.air-rhonealpes.fr/data",
-			"atmoImg":"http://www.air-rhonealpes.fr/sites/ra/files/thumbnails/image/",
-			"types":["indiceAtmo", "indiceAtmoFull"]
-		}
+		"contact":{
+			"mailsDest":"************"
+		},
+		"meteo":{
+			"url":"https://www.prevision-meteo.ch/services/json/grenoble"
+		},
+		"saisie":{
+             "file":"BAN_odbl_38-json",
+             "fileZonePeuDence":"tarifzone.geojson"
+		},
+		"biv":{
+			"listeLignes":["C5"],
+			"c38":true
+        },
+		"totemAtmo":{}
 	}
 }

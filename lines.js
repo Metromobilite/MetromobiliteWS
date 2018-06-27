@@ -23,111 +23,89 @@
 // module de distribution des geometries des lignes de transport en commun
 
 var fs = require('fs');
-var main = require('./index');
 var querystring = require('querystring');
-
+const Joi = require('koa-joi-router').Joi;
+var main = require('./index');
 var dyn = require('./dynWs');
 var polyline = require('./polyline');
 
 global.lignesTypees=[];
-global.lignes={"type": "FeatureCollection", "features": []};
+global.lignesTypeesObj={};
 global.lignesP={"type": "FeatureCollection", "features": []};
 
-exports.init = function *(config) {
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/lines/:format',
+		handler: getLines,
+		meta:{
+			description:'Les données linéaires en geojson ou en encoded polyline (lignes de tranposrt en commun).'
+		},
+		groupName: 'Référentiel',
+		cors:true,
+		validate:{
+			params:{
+				format:Joi.string().alphanum()
+			},
+			query:{
+				types:Joi.string(),
+				codes:Joi.string(),
+				reseaux:Joi.string()
+			}
+		}
+	}
+]
+
+exports.init = async function (config) {
 	var file = config.plugins.lines.lineFile;
 	var type = config.plugins.lines.lineType;
 	var data = fs.readFileSync(config.dataPath+file, 'utf8');
 	var json = JSON.parse(data);
 	global.lignesTypees = json;
-	console.log(type+' loaded, total : '+global.lignesTypees.length+' elements (+'+json.length+')');
-	
-
-	file = config.plugins.lines.geomFile;
-	type = config.plugins.lines.geomType;
-	var data = fs.readFileSync(config.dataPath+file, 'utf8');
-	var json = JSON.parse(data);
-
-	json.features.forEach(function (feature,index){
-		//if(typeof(feature.properties.type)=='undefined') feature.properties.type = type;
+	console.log(type+' loaded, total : '+global.lignesTypees.length+' elements');
+	json.forEach(function (feature,index){
+		global.lignesTypeesObj[feature.id]=feature;
+	});
+}
+exports.initRef = function(type){
+	global.lignesP.features=[];
+	global.ref[type].features.forEach(function (feature,index){
 		if(typeof(feature.properties.id)=='undefined') feature.properties.id = feature.properties.CODE;
-	});
-	//global.lignes.features=global.lignes.features.concat(json.features);
-	global.lignes=json;
-	console.log(type+' loaded, total : '+global.lignes.features.length+' elements (+'+json.features.length+')');
-	
-	global.lignes.features.forEach(function (f,index){
-		var p = JSON.parse(JSON.stringify( f.properties));//résoud les problemes de copy par pointeur
-		global.lignesP.features.push({"properties":p});
-		global.lignesP.features[index].properties.shape = polyline.fromGeoJSON(global.lignes.features[index],5);
-	});
 
+		//version poly
+		var p = JSON.parse(JSON.stringify( feature.properties));//résoud les problemes de copy par pointeur
+		global.lignesP.features.push({properties:p});
+		global.lignesP.features[index].properties.shape = polyline.fromGeoJSON(global.ref[type].features[index],5);
+	});
+	
+	console.log(type+' loaded, total : '+global.ref[type].features.length);	
 }
 
-exports.initKoa = function (app,route) {
-	
-	// http://data.metromobilite.fr/api/lines/json?types=ligne&codes=SEM_B,SEM_C,SEM_A,SEM_D,SEM_E
-	app.use(route.get('/api/lines/json', function *() {
-		try {
-			var params = querystring.parse(this.querystring);
-			var poiTyped={"type": "FeatureCollection", "features": []};
-			if (params.codes) {
-				var codes = params.codes.split(',');
-				poiTyped.features = global.lignes.features.filter(function(f){
-					return (codes.indexOf(f.properties.CODE)!=-1);
-				});
-			}
-			if (params.reseaux) {
-				var reseaux = params.reseaux.split(',');
-				poiTyped.features = global.lignes.features.filter(function(f){
-					return (reseaux.indexOf(f.properties.CODE.substr(0,3))!=-1);
-				});
-			}
-			this.body = poiTyped;
-		} catch(e){
-			dumpError(e,'/api/lines/json');
-		}
-	}));
-	
-	// http://data.metromobilite.fr/api/lines/poly?types=ligne&codes=SEM_B,SEM_C,SEM_A,SEM_D,SEM_E
-	app.use(route.get('/api/lines/poly', function *() {
-		try {
-			var params = querystring.parse(this.querystring);
-			var poiTyped={"type": "FeatureCollection", "features": []};
-			if (params.codes) {
-				var codes = params.codes.split(',');
-				poiTyped.features = global.lignesP.features.filter(function(f){
-					return (codes.indexOf(f.properties.CODE)!=-1);
-				});
-			}
-			if (params.reseaux) {
-				var reseaux = params.reseaux.split(',');
-				poiTyped.features = global.lignesP.features.filter(function(f){
-					return (reseaux.indexOf(f.properties.CODE.substr(0,3))!=-1);
-				});
-			}
-			this.body = poiTyped;
-		} catch(e){
-			dumpError(e,'/api/lines/poly');
-		}
-	}));
-}
+// http://data.metromobilite.fr/api/lines/json?types=ligne&codes=SEM_B,SEM_C,SEM_A,SEM_D,SEM_E
+// http://data.metromobilite.fr/api/lines/poly?types=ligne&codes=SEM_B,SEM_C,SEM_A,SEM_D,SEM_E
+async function getLines(ctx) {
+	try {
+		var format = ctx.request.params.format;
+		var features = []
+		if (format=='json') features = global.ref['ligne'].features;
+		else if(format=='poly') features = global.lignesP.features;
 
-exports.initTest = function (config) {
-	
-	// "{ \"features\": [ {\"properties\": { \"type\":\"ligne\", \"code\":\"N1_999\", \"nsv_id\":\"1\", \"time\": %TMS%000} } ] }"
-	
-	var o = { "features": [] };
-	var iTime = (new Date()).getTime();
-	
-	var type = config.plugins.lines.geomType;
-	global.lignes.features.forEach(function (f,index){
-		if(f.properties.CODE) {
-			o.features.push({"properties": { "type":type, "code":f.properties.CODE, "nsv_id":"1", "time": iTime } });
-			//console.log(f.properties.CODE);
+		var params = querystring.parse(ctx.querystring);
+		var poiTyped={"type": "FeatureCollection", "features": []};
+		if (params.codes) {
+			var codes = params.codes.split(',');
+			poiTyped.features = features.filter(function(f){
+				return (codes.indexOf(f.properties.CODE)!=-1);
+			});
 		}
-	});
-	
-	if (o.features.length) {
-		dyn.ajouterDyn(o);
+		if (params.reseaux) {
+			var reseaux = params.reseaux.split(',');
+			poiTyped.features = features.filter(function(f){
+				return (reseaux.indexOf(f.properties.CODE.substr(0,3))!=-1);
+			});
+		}
+		ctx.body = poiTyped;
+	} catch(e){
+		main.dumpError(e,'lines.getLines');
 	}
 }

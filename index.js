@@ -22,15 +22,22 @@
 
 // module principal qui appelle les autres en fonction du fichier config.json
 
-var koa = require('koa');
-var gzip = require('koa-gzip');
-var route = require('koa-route');
+const Koa = require('koa');
+const router = require('koa-joi-router');
+const Joi = router.Joi;
+const public = router();
+
+var compress = require('koa-compress');
 var jsonp = require('koa-jsonp');
-var request = require('koa-request');
-var cors = require('koa-cors');
+var cors = require('@koa/cors');
+var range = require('koa-range');
+
+var docs = require('koa-docs');
+
 var querystring = require('querystring');
 var co = require('co');
 var fs = require('fs');
+var urlParse = require('url');
 
 var EventEmitter = require("events").EventEmitter;
 exports.eventEmitter = new EventEmitter();
@@ -45,43 +52,26 @@ exports.setDebug = function(bDebug){global.debug = bDebug; console.log('Debug is
 exports.getConfig = function() { return config;}
 exports.dumpError = function(err,caller) {return dumpError(err,caller);}
 
-try {
-	var f = fs.readFileSync('config.json', 'utf8');
-	parseConfig(f);
+async function init(){
+	try {
+		var f = fs.readFileSync('config.json', 'utf8');
+		parseConfig(f);
 
-	co(function *(){
+		
 		// init des plugins
 		for(var p in config.plugins) {
-			if(global.plugins.name[p].init) yield global.plugins.name[p].init(config);
+			if(global.plugins.name[p].init) await global.plugins.name[p].init(config);
 		}
 
 		console.log('Fin du chargement des donnees statiques');
-		var app = koa();
+		initKoaPublic();
 
-		var options = {
-			origin: true,
-			methods: 'GET,HEAD,PUT,POST,DELETE',
-			expose: ['MM-STOPTIMES-STATUS']
-		}
-		app.use(cors(options));
-		app.use(gzip());
-		app.use(jsonp());
+		process.on('unhandledRejection', (reason, p) => {
+			console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+			console.log(reason.stack);
+			// application specific logging, throwing an error, or other logic here
+		});
 
-		//init des url koa
-		for(var p in config.plugins) {
-			if(global.plugins.name[p].initKoa) global.plugins.name[p].initKoa(app,route);
-		}
-		
-		// all other routes
-		app.use(function *() {
-			this.body = 'Oups !';
-		});
-		app.on('error', function(err, ctx){
-		  log.error('server error', err, ctx);
-		});
-		var server = app.listen(config.port, function() {
-			console.log('Listening on http://localhost:'+config.port);
-		});
 		// envoi de données de test
 		if(process.argv[2] === 'test') {
 			console.log('---Test mode START');
@@ -90,22 +80,148 @@ try {
 			}
 			console.log('---Test mode END');
 		}
-	}).catch(dumpError);
+
+	} catch(e) {
+		dumpError(e,'main');
+	}
+}
+
+function initKoaPublic() {
+	var app = new Koa();
+	app.use(async function (ctx, next) {
+		try {
+			await next();
+		}
+		catch (err) {
+			ctx.status = err.status || 500;
+			ctx.type = 'html';
+			ctx.body = '<p>Erreur serveur.</p>';
+			ctx.app.emit('error', err, ctx);
+		}
+	});
+	app.use(compress({}));
+	//en test cors pour tout le monde
 	
-} catch(e) {
-	dumpError(e,'main');
+	//aggregation des routes
+	var routesCors = [];
+	var routesNoCors = [];
+	var groups = {};
+	var allGroups = {};
+	for (var p in config.plugins) {
+		//routes externes
+		if (global.plugins.name[p].routes) {
+			for (var i = 0; i < global.plugins.name[p].routes.length; i++) {
+				var rte = global.plugins.name[p].routes[i];
+				if (!rte.cors) {
+					routesNoCors.push(rte);
+				}
+				else {
+					routesCors.push(rte);
+				}
+				var groupName = 'Autres';
+				if (rte.groupName)
+					groupName = rte.groupName;
+				if (!allGroups[groupName])
+					allGroups[groupName] = { groupName: groupName, routes: [] };
+				allGroups[groupName].routes.push(rte);
+				if (!rte.private) {
+					if (!groups[groupName])
+						groups[groupName] = { groupName: groupName, routes: [] };
+					groups[groupName].routes.push(rte);
+				}
+			}
+		}
+		//routes internes d'injection de données
+		if (global.plugins.name[p].dynRoutes) {
+			for (var i = 0; i < global.plugins.name[p].dynRoutes.length; i++) {
+				var rte = global.plugins.name[p].dynRoutes[i];
+				var groupName = 'Autres';
+				if (rte.groupName)
+					groupName = rte.groupName;
+				if (!allGroups[groupName])
+					allGroups[groupName] = { groupName: groupName, routes: [] };
+				allGroups[groupName].routes.push(rte);
+			}
+		}
+	}
+	
+	//doc complete
+	var docFullOptions = {
+		title: 'API M Full',
+		version: '1.0.0',
+		theme: 'cyborg',
+		routeHandlers: 'collapsed',
+		groups: []
+	};
+	for (var grp in allGroups) {
+		docFullOptions.groups.push(allGroups[grp]);
+	}
+	app.use(docs.get('/docs', docFullOptions));
+	
+	//doc utilisateurs
+	var docOptions = {
+		title: 'API Metromobilité',
+		version: '1.0.0',
+		theme: 'cyborg',
+		routeHandlers: 'disabled',
+		groups: []
+	};
+	for (var grp in groups) {
+		docOptions.groups.push(groups[grp]);
+	}
+	app.use(docs.get('/api/docs', docOptions));
+	
+	//ws restreints a certaines url
+	var restrictedOptions = {
+		origin: getCorsOrigin,
+		allowMethods: 'GET,HEAD,PUT,POST,DELETE',
+		exposeHeaders: ['MM-STOPTIMES-STATUS']
+	};
+	app.use(cors(restrictedOptions));
+	
+	//init des url koa
+	app.use(range);
+	public.route(routesNoCors);
+
+	//ws non restreints
+	app.use(jsonp());
+	var options = {
+		allowMethods: 'GET,HEAD,PUT,POST,DELETE',
+		exposeHeaders: ['MM-STOPTIMES-STATUS']
+	};
+	app.use(cors(options));
+	//init des middleware specifiques
+	for (var p in config.plugins) {
+		if (global.plugins.name[p].initMiddleware)
+			global.plugins.name[p].initMiddleware(app);
+	}
+	public.route(routesCors);
+	app.use(public.middleware());
+	
+	//console.log(public.routes);
+
+	// si on a pas trouvé de route correspondante
+	app.use(async (ctx) => {
+		ctx.body = 'Oups !';
+	});
+	app.on('error', function (err, ctx) {
+		console.error('server error', err, ctx);
+	});
+	var server = app.listen(config.port, function () {
+		console.log('Listening on http://localhost:' + config.port);
+	});
 }
 
 function parseConfig(data) {
 	try {
 		config = JSON.parse(data);
-		
+
 		if( typeof(config.port)=='undefined') throw {message :'no port field in config.json'};
 		if( typeof(config.portDyn)=='undefined') throw {message :'no dyn port field in config.json'};
 		if( typeof(config.portRT)=='undefined') throw {message :'no rt port field in config.json'};
-		
+
 		config.types={};
-		
+
 		initPlugins(config);
 	} catch(e) {
 		dumpError(e,'config.json');
@@ -113,18 +229,18 @@ function parseConfig(data) {
 }
 
 function dumpError(err,caller) {
-  if (typeof err === 'object') {
-    if (err.message) {
-      console.log('\n'+(caller?caller+' : ':'')+'Message : ' + err.message);
-    }
-    if (err.stack) {
-      console.log('\nStacktrace:');
-      console.log('====================');
-      console.log(err.stack);
-    }
-  } else {
-    console.log('dumpError :: argument is not an object');
-  }
+  	if (typeof err === 'object') {
+		if (err.message) {
+		console.error((caller?caller+' : ':'')+'Message : ' + err.message);
+		}
+		if (exports.isDebug() && err.stack) {
+		console.error('\nStacktrace:');
+		console.error('====================');
+		console.error(err.stack);
+		}
+  	} else {
+		console.error('dumpError :: argument is not an object : '+ err);
+  	}
 }
 
 function initPlugins(config) {
@@ -134,3 +250,29 @@ function initPlugins(config) {
 			global.plugins.types[config.plugins[p].types[t]] = global.plugins.name[p];
 	}
 }
+function getCorsOrigin(ctx){
+	var restrictedEndPoints = config.restrictedEndPoints;
+	var allowedOrigins = config.allowedOrigins;
+	if (process.argv[2] === 'test') return '*';
+	var e, bRestrited = false;
+	for (var i = 0; i < restrictedEndPoints.length; ++i) {
+		e = restrictedEndPoints[i];
+		if (e === ctx.url.substring(0, e.length)) {
+			bRestrited = true;
+			break;
+		}
+	}
+	var a, bAllowed = false;
+	if(bRestrited) {
+		var originHostname = urlParse.parse(ctx.header.origin).hostname;
+		for (var i = 0; i < allowedOrigins.length; ++i) {
+			a = allowedOrigins[i];
+			if (originHostname.endsWith(a)) {
+				bAllowed = true;
+				break;
+			}
+		}
+	}
+	return ((!bRestrited || bAllowed)?'*':false);
+}
+init();

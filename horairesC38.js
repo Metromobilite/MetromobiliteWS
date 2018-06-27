@@ -21,8 +21,7 @@
 // *
 
 // dependence du module otpHoraires pour les données temps reel du reseau departemental (reseau secondaire)
-var kRequest = require('koa-request');
-
+var axios = require('axios');
 var main = require('./index');
 var otpHoraires = require('./otpHoraires');
 
@@ -31,34 +30,41 @@ global.C38 = {
 	stops:{},
 	routes:{}
 };
-
-exports.getStatique = function *() {
+exports.init = async function (config) {
+	global.liaisonsServeurs['C38'] = { libelle:'Cityway Itinisère', lifecycle:otpHoraires.NOT_INITIALIZED };
+	main.eventEmitter.on('otpLoaded', async function (evt) {
+		getStatique();
+	});
+}
+async function getStatique () {
 	var config = main.getConfig();
 	urlC38 = config.plugins.otpHoraires.dependencies.horairesC38.url;
 	keyC38 = config.plugins.otpHoraires.dependencies.horairesC38.key;
 	global.etatsServeurs['C38']=false;
 	global.etatsServeurs['lastFailC38']=false;
-	yield exports.test();
+	await exports.test();
 }
 
-exports.test = function *() {
+exports.test = async function () {
 	try{
 		if(global.etatsServeurs.lastFailC38 && global.etatsServeurs.lastFailC38 + 60000 > new Date().getTime()) {
 			return false;
 		}
-		var resp = yield kRequest.get({url:urlC38+'/transport/v3/trippoint/GetCategoriesIds/json?true=true'+keyC38, timeout: 10000,json: true});
-		if(!!resp.body && resp.body.StatusCode == 200) {
-			if(global.etatsServeurs.C38) 
+		var options = {method:'get', url:urlC38+'/transport/v3/trippoint/GetCategoriesIds/json?true=true'+keyC38, timeout: 10000, responseType: 'json'};
+		if(main.isDebug()) console.log(options.url);
+		var res = await axios(options);
+		if (res.status!=200 || res.statusText!='OK' || !res.data) {
+			otpHoraires.changeEtatServeur('C38',false);
+			console.error('ECHEC de horairesC38.test code : '+(resp.data?resp.status:'???'));
+			console.error('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailC38+60000).toLocaleTimeString());
+			return false;
+		} else {
+			if(global.etatsServeurs.C38)
 				return true;
 			else {
-				yield load(main.getConfig());
+				await load(main.getConfig());
 				return true;
 			}
-		} else {
-			otpHoraires.changeEtatServeur('C38',false);
-			console.log('ECHEC de horairesC38.test code : '+(resp.body?resp.body.StatusCode:'???'));
-			console.log('Prochaine tentative : '+new Date(global.etatsServeurs.lastFailC38+60000).toLocaleTimeString());
-			return false;
 		}
 	} catch(e){
 		otpHoraires.changeEtatServeur('C38',false);
@@ -70,7 +76,7 @@ exports.test = function *() {
 exports.getOptions = function(idOtp){
 	var idsC38 = [];
 	idOtp.split(',').forEach(function(i){if(global.otp.stops[i]) idsC38.push(global.otp.stops[i].c38Id);});
-	return {url:urlC38+'/transport/v3/timetable/GetStopHours/json?MaxItemsByStop=6'+keyC38+'&TimeTableType=RealTime&StopIds='+idsC38.join('|'), timeout: 5000,json: true};
+	return {url:urlC38+'/transport/v3/timetable/GetStopHours/json?MaxItemsByStop=6'+keyC38+'&TimeTableType=RealTime&StopIds='+idsC38.join('|'), timeout: 5000,responseType: 'json',method:'get'};
 }
 exports.isMyResponse = function(resp){
 	return (resp.Data.Hours);
@@ -92,6 +98,10 @@ exports.parseResponse = function(resp){
 	}
 	for (var i=0 ; i < resp.Data.Hours.length ; i++) {
 		var l = resp.Data.Hours[i];
+		if (!global.C38.routes[l.LineId]) {
+			console.log('Unknown Line :'+ l.LineId);
+			continue;
+		}
 		var line = 'C38:'+global.C38.routes[l.LineId].Number;
 		var journeyId = ''+vehicleJourneys[''+l.VehicleJourneyId].journeyId;
 		var dest = vehicleJourneys[''+l.VehicleJourneyId].journeyDestination;
@@ -102,7 +112,7 @@ exports.parseResponse = function(resp){
 					id : line+':'+journeyId,
 					desc : dest,
 					dir : dir,
-					shortDesc : dest.substring(0,15)
+					shortDesc : dest.substring(0,15).toUpperCase()
 				},
 				times :[]
 			};
@@ -141,15 +151,23 @@ exports.parseResponse = function(resp){
 	return res;
 };
 
-var load = function *(config) {
+async function load(config) {
 	try {
-		var reqs = {
-			stops:kRequest.get({url:urlC38+'/transport/v3/stop/GetStops/json?true=true'+keyC38, timeout: 50000,json: true}),
-			routes:kRequest.get({url:urlC38+'/transport/v3/line/GetLines/json?OperatorIds=12&OnlyPublished=true'+keyC38, timeout: 50000,json: true}),
-		};
-		var res = yield reqs;
-		parseStops(res.stops);
-		parseRoutes(res.routes);
+		const stopsPromise = axios({method:'get', url:urlC38+'/transport/v3/stop/GetStops/json?true=true'+keyC38, timeout: 50000, responseType: 'json'});
+		const routesPromise = axios({method:'get', url:urlC38+'/transport/v3/line/GetLines/json?OperatorIds=12&OnlyPublished=true'+keyC38, timeout: 50000, responseType: 'json'});
+	
+		const [stopsRes,routesRes] = await axios.all([stopsPromise,routesPromise]);
+	
+		if (stopsRes.status!=200 || stopsRes.statusText!='OK' || !stopsRes.data) {
+			console.error("horairesC38 : Erreur stops : " + stopsRes.status + " Message : " + stopsRes.statusText);
+			exports.testC38();
+		} else if (routesRes.status!=200 || routesRes.statusText!='OK' || !routesRes.data) {
+			console.error("horairesC38 : Erreur routes : " + routesRes.status + " Message : " + routesRes.statusText);
+			exports.testC38();
+		}
+	
+		parseStops(stopsRes.data);
+		parseRoutes(routesRes.data);
 		otpHoraires.changeEtatServeur('C38',true);
 		console.log('C38 Initialisé !');
 	} catch(e){
@@ -159,8 +177,8 @@ var load = function *(config) {
 }
 var parseStops = function(resp) {
 	var nbPresents = 0;
-	if(resp.body && resp.body.Data) {
-		resp.body.Data.forEach(function (stop){
+	if(resp && resp.Data) {
+		resp.Data.forEach(function (stop){
 			if (stop.Operator.Code == 'CG38') {
 				var code = 'C38:'+stop.Code;
 				if(global.otp.stops[code]) {
@@ -180,8 +198,8 @@ var parseStops = function(resp) {
 };
 
 var parseRoutes = function(resp) {
-	if(resp.body && resp.body.Data) {
-		resp.body.Data.forEach(function (route){
+	if(resp && resp.Data) {
+		resp.Data.forEach(function (route){
 			var code = 'C38:'+route.Number;
 			if(global.otp.routes[code]) {
 				global.C38.routes[route.Id]= route;

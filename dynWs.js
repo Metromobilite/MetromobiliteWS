@@ -22,114 +22,199 @@
 
 // module destiné a recuperer les données temps réel et a les transformer
 
-var app = require('koa')();
-var route = require('koa-route');
-var cors = require('koa-cors');
-var request = require('request');
+var Koa = require('koa');
+var cors = require('@koa/cors');
+const router = require('koa-joi-router');
+const Joi = router.Joi;
+const dynRouter = router();
+
 var parse = require('co-body');
 var querystring = require('querystring');
 var getRawBody = require('raw-body');
 var rt = require('./rtWs');
 var main = require('./index');
-var gtfsRt = require('./gtfsRtWs');
+//var gtfsRt = require('./gtfsRtWs');
 
+const NOT_INITIALIZED = 'Not Initialized';
+exports.NOT_INITIALIZED = NOT_INITIALIZED;
+global.ref={
+	'PAR':{type: "FeatureCollection", features: []},
+	'PKG':{type: "FeatureCollection", features: []},
+	'PMV':{type: "FeatureCollection", features: []},
+	'PME':{type: "FeatureCollection", features: []},
+	'trr':{type: "FeatureCollection", features: []},
+	'ligne':{type: "FeatureCollection", features: []},
+	'CAM':{type: "FeatureCollection", features: []},
+	'vh':{type: "FeatureCollection", features: []}
+};// type associés a des données dynamiques(PAR/PKG/PMV/PME/trr/ligne/vh/CAM)
+global.refTime={
+	'PAR':NOT_INITIALIZED,
+	'PKG':NOT_INITIALIZED,
+	'PMV':NOT_INITIALIZED,
+	'PME':NOT_INITIALIZED,
+	'trr':NOT_INITIALIZED,
+	'ligne':NOT_INITIALIZED,
+	'CAM':NOT_INITIALIZED,
+	'vh':NOT_INITIALIZED
+}
 global.dyn={};
 global.dynCam={};
-global.dyn['status'] = {};
 
-var options = {
-	origin: true,
-	methods: 'GET,HEAD,PUT,POST,DELETE'
-}
+global.dynIconMeteo={};
+global.dynEvtTrGeojson={type: "FeatureCollection", features: []};
 
-app.use(cors(options));
 
-exports.init = function *(config) {
-	app.listen(config.portDyn, function() {
-		console.log('Listening on http://localhost:'+config.portDyn);
-	});
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/dyn/:type/json',
+		handler: getDyn,
+		meta:{
+			description:'Données temps reel du type choisi type.'
+		},
+		groupName: 'Temps réel',
+		cors:true,
+		validate:{
+			params:{
+				type:Joi.string().alphanum(),
+				key:Joi.number()
+			}
+		}
+	},
+	{
+		method: 'get',
+		path: '/api/dyn/evtTR/geojson',
+		handler: getDynEvtTr,
+		meta:{
+			description:'Evenements routiers au format geojson.'
+		},
+		groupName: 'Temps réel',
+		cors:true
+	}
+]
+exports.dynRoutes = [
+	{
+		method: 'post',
+		path: '/update/ref/:type',
+		handler: postRef,
+		meta:{
+			description:'Réception des données temps Réel.'
+		},
+		groupName: 'Données entrantes',
+		validate:{
+			type:'json',
+			maxBody: '2000kb',
+			params:{
+				type:Joi.string().alphanum()
+			}
+		}
+	},
+	{
+		method: 'post',
+		path: '/update/:type',
+		handler: postDyn,
+		meta:{
+			description:'Réception des données de référence liées au temps Réel.'
+		},
+		groupName: 'Données entrantes',
+		validate:{
+			type:'json',
+			params:{
+				type:Joi.string().alphanum()
+			}
+		}
+	},
+	{
+		method: 'post',
+		path: '/updateCamera',
+		handler: postCam,
+		meta:{
+			description:'Réception des vidéos des cameras.'
+		},
+		groupName: 'Données entrantes'
+	},
+];
+exports.init = async function (config) {
+	initKoaDyn(config);
+
 	if(!rt.init(config)){}
 
 	for(var p in config.plugins) {
-		if(global.plugins.name[p].initDynamique) global.plugins.name[p].initDynamique();
+		if(!global.plugins.name[p]) console.error('Impossible d\'inititaliser les données dynamiques de '+p);
+		if(!!global.plugins.name[p].initDynamique) global.plugins.name[p].initDynamique();
 	}
 };
-
-exports.initKoa = function (mainApp,mainRoute) {
-	// http://data.metromobilite.fr/api/dyn/:type/json
-	mainApp.use(mainRoute.get('/api/dyn/:type/json', function *(type) {
+function initKoaDyn(config){
+	var app = new Koa();
+	var options = {
+		allowMethods: 'GET,HEAD,PUT,POST,DELETE'
+	}
+	app.use(cors(options));
+	app.use(async (ctx, next) => {
 		try{
-			var params = querystring.parse(this.querystring);
-			if (type=='omms') type='hamo';
-			this.body = getDyn(type,params);
+			/*if (ctx.request.header['content-type'] == 'application/json') {
+				ctx.request.body = await parse.json(ctx,{ limit: '2mb' });
+			} else {
+				var string = await getRawBody(ctx.req, {//recuperation du flux mp4
+					length: ctx.length,
+					limit: '1mb'
+				});
+				ctx.request.body =string;
+			}*/
+			await next();
 		} catch(e){
-			main.dumpError(e,'/api/dyn/'+type+'/json');
+			console.error(ctx.request.path);
+			main.dumpError(e,'dynWS app.use(async (ctx, next)');
 		}
-	}));
-	gtfsRt.initKoa(mainApp,mainRoute);
+	});
+	app.on('error', function(err, ctx){
+		console.error('server error', err, ctx);
+  	});
+	dynRouter.route(exports.dynRoutes);
+
+	app.use(dynRouter.middleware());
+
+	app.listen(config.portDyn, function() {
+		console.log('Listening on http://localhost:'+config.portDyn);
+	});
+	
+	// all other routes
+	app.use(async ctx => {
+		ctx.body = 'Oups !';
+	});
 }
-
-app.use(function* (next) {
-  try{
-	if (this.request.header['content-type'] == 'application/json') {
-		this.request.body = yield parse.json(this);
-	} else {
-		var string = yield getRawBody(this.req, {//recuperation du flux mp4
-				length: this.length,
-				limit: '1mb'
-		});
-		
-		this.request.body =string;
-	  } 
-	  
-	  yield next;
-	  
-	} catch(e){
-		main.dumpError(e,'dynWS app.use(function* (next)');
-	}
-});
-
-app.use(route.post('/update', function *() {
-	try{
-		this.response.body = ajouterDyn(this.request.body);
-	} catch(e){
-		main.dumpError(e,'/update');
-	}
-}));
-
-app.use(route.post('/updateEvt', function *() {
-	try{
-		
-		this.response.body = refreshEvt(this.request.body);
-	} catch(e){
-		main.dumpError(e,'/updateEvt');
-	}
-}));
-
-app.use(route.post('/updateCamera', function *() {
-	try{
-		this.response.body = refreshCamera(this.request.body, this.request.header);
-	} catch(e){
-		main.dumpError(e,'/updateCamera');
-	}
-}));
-
-// all other routes
-app.use(function *() {
-	this.body = 'Oups !';
-});
-
 function refreshEvt(json) {
 	var type = 'evt';
 	global.dyn[type] = json;
 	main.eventEmitter.emit('updateDynData',{type:type,data:global.dyn[type]});
 	var dynEvtTR = {};
 	var dynEvtTC = {};
+	var dynEvtTrGeojson = {type: "FeatureCollection", features: []};
 	for (e in json) {
 		if(json[e].listeLigneArret) 
 			dynEvtTC[e]=json[e];
-		else
+		else {
 			dynEvtTR[e]=json[e];
+			var dateDebTab = json[e].dateDebut.split('/');
+			var dateFinTab = json[e].dateFin.split('/');
+			
+			dynEvtTrGeojson.features.push({
+				type: "Feature",
+				properties: {
+					text:json[e].texte,
+					startDate:new Date(dateDebTab.reverse().join('-')).getTime(),
+					endDate:new Date(dateFinTab.reverse().join('-')).getTime(),
+					id:json[e].id,
+					code:e,
+					type:json[e].type,
+					startHour:json[e].heureDebut,
+					endHour:json[e].heureFin,
+					weekEnd:json[e].weekEnd,
+				},
+				geometry: { type: "Point", coordinates: [parseFloat(json[e].longitude),parseFloat(json[e].latitude)] }
+			});
+		}
+		
 	}
 	type='evtTC';
 	global.dyn[type]=dynEvtTC;
@@ -137,9 +222,8 @@ function refreshEvt(json) {
 	type='evtTR';
 	global.dyn[type]=dynEvtTR;
 	main.eventEmitter.emit('updateDynData',{type:type,data:global.dyn[type]});
-	
-	gtfsRt.updateAlerts();
-	return true;
+	global.dynEvtTrGeojson=dynEvtTrGeojson;
+	return { status:200 , etatsServeurs:global.etatsServeurs};
 };
 
 function refreshCamera(data,header) {
@@ -148,102 +232,101 @@ function refreshCamera(data,header) {
 		var fs = require('fs');
 		fs.writeFile(header['name'], data, function(err) {
 		if(err) {
-			return console.log(err);
+			console.log(err);
+			return err;
 		}});
 	}
-	return true;
+	var res = { status:200 };
+	if(!!global.ref['CAM'] && global.refTime['CAM']==NOT_INITIALIZED) res.action = 'SEND_REF';
+	return res;	
 };
-exports.ajouterDyn = function(json,purge) {
-	return ajouterDyn(json,purge);
-}
-function ajouterDyn(json,purge) {
-	
-	var config = main.getConfig();
-	
-	if(typeof(purge)=='undefined') purge=false;
-	if(json.features) {
-		var types = {};
-		
-		var codesPresents = {};
-		json.features.forEach(function (feature,index){
-			var type = ''+(feature.properties.type?feature.properties.type:feature.properties.TYPE);
-			types[type]=true;
-			if (!codesPresents[type]) codesPresents[type]={}
-			delete feature.properties.type;
-			if(!feature.properties.code) {
-				console.log('ajouterDyn : missing code !');
-				return false;
-			} else if (feature.properties.time == -1 || feature.properties.time == -1000){
-				return false;
-			} else {
-				var code = ''+feature.properties.code;
-				codesPresents[type][code]=true;
-				delete feature.properties.code;
-				if(!global.dyn[type]) {
-					global.dyn[type] = {};
-					console.log('Réception de données dynamiques : '+type);
-				}
-				if(!global.dyn[type][code]) global.dyn[type][code] = [];
-				if (type == 'indiceTc' || type == 'indiceTr') {
-					feature.properties.time = new Date().getTime();
-				}
-				var lastTime = 0;
-				if(global.dyn[type][code].length>0) lastTime = global.dyn[type][code][global.dyn[type][code].length-1].time;
-				if (feature.properties.time > lastTime){
-					if(!global.dyn['status'][type]) global.dyn['status'][type] = {};
-					var partenaire;
-					if (type =='hamo') partenaire = 'HAM';
-					else partenaire = code.substr(0,3);
-					if(type != 'indiceTc' && type != 'indiceTr' && type != 'trr') global.dyn['status'][type][partenaire]=feature.properties.time;
-					
-					global.dyn[type][code].push(feature.properties);
-					delete global.dyn[type][code][global.dyn[type][code].length-1].code;
-					if(global.dyn[type][code].length>parseInt(config.max_keep_dyn) || (purge && global.dyn[type][code].length>1) ) {
-						global.dyn[type][code].shift();
-					}
-				} else {
-					//on recale l'heure car le nsv est toujours d'actualite
-					if (type == 'trr' || type == 'ligne' || type == 'indiceTc' || type == 'indiceTr') {
-						if(global.dyn[type][code].length>0) global.dyn[type][code][global.dyn[type][code].length-1].time = new Date().getTime();
-					}
-				}
-			}
+async function postRef(ctx){
+	try{
+		var type = ctx.request.params.type;
+		ctx.request.body.features.forEach(function (feature,index){
+			feature.properties.type=type;
+			if(!feature.properties.id) feature.properties.id=feature.properties.CODE;
 		});
-		for(var type in types) {
-			// on purge les trop vieux
-			for(var code in global.dyn[type]) {
-				var lastTime = 0;
-				if(global.dyn[type][code].length>0) lastTime = global.dyn[type][code][global.dyn[type][code].length-1].time;
-				var now = new Date().getTime();
-				// trop vieux
-				if (type != 'indiceTc' && type != 'indiceTr' && !codesPresents[type][code] && lastTime < (now - 24*60*1000)) {
-					delete global.dyn[type][code];
-				}
-				//on prolonge pour les indices
-				if (!codesPresents[type][code] && lastTime > (now - 24*60*1000) && (type == 'indiceTc' || type == 'indiceTr')) {
-					global.dyn[type][code][global.dyn[type][code].length-1].time = new Date().getTime();
-				}
-			}
-			main.eventEmitter.emit('updateDynData',{type:type,data:global.dyn[type]});
-			main.eventEmitter.emit('updateDynData',{type:'status',data:global.dyn['status']});
+		global.ref[type] = ctx.request.body;
+		global.refTime[type] = new Date().getTime();
+		if (!!global.plugins.types[type] && !!global.plugins.types[type].initRef) {
+			global.plugins.types[type].initRef(type);
 		}
-		return true;
-	} else {
-		console.log('ajouterDyn : no features !');
-		return false;
+		ctx.response.body = { status : 200 };
+
+	} catch(e){
+		main.dumpError(e,'dynWs.postRef');
 	}
 }
-function getDyn(type,params) {
-	if (!!global.plugins.types[type] && !!global.plugins.types[type].getDyn) {
-		return global.plugins.types[type].getDyn(type,params);
+async function postDyn(ctx){
+	try{
+		var type = ctx.request.params.type;
+		if(type=='evt') 
+			ctx.response.body = refreshEvt(ctx.request.body);
+		else
+			ctx.response.body = ajouterType(type,ctx.request.body);
+	} catch(e){
+		main.dumpError(e,'dynWs.postDyn');
 	}
-	return (!global.dyn[type]) ? {} : global.dyn[type];
+}
+async function postCam(ctx){
+	try{
+		var string = await getRawBody(ctx.req, {//recuperation du flux mp4
+			length: ctx.length,
+			limit: '1mb'
+		});
+		ctx.request.body =string;
+
+		ctx.response.body = refreshCamera(ctx.request.body, ctx.request.header);
+		ctx.response.set('Content-Type','application/json');
+	} catch(e){
+		main.dumpError(e,'dynWs.postCam');
+	}
 }
 
+// http://data.metromobilite.fr/api/dyn/:type/json
+async function getDyn(ctx) {
+	try{
+		var type = ctx.request.params.type;
+		/*var params = querystring.parse(ctx.querystring);
+		if (!!global.plugins.types[type] && !!global.plugins.types[type].getDyn) {
+			ctx.body = global.plugins.types[type].getDyn(type,params);
+		} else {*/
+			ctx.body = (typeof(global.dyn[type]) === 'undefined' ) ? {} : global.dyn[type];
+		//}
+	} catch(e){
+		main.dumpError(e,'dynWs.getDyn');
+	}
+}
+// http://data.metromobilite.fr/api/dyn/evtTR/geojson
+async function getDynEvtTr(ctx){
+	try{
+		ctx.body = global.dynEvtTrGeojson;
+	} catch(e){
+		main.dumpError(e,'dynWs.getDynEvtTr');
+	}
+}
+
+exports.ajouterType = function(type,json) {
+	return ajouterType(type,json);
+}
+// reponses possibles :
+// action:'SEND_REF' envoyer les données de references associées au type
+function ajouterType(type,json) {
+	var config = main.getConfig();
+	if(!global.dyn[type]) {
+		console.log('Réception de données dynamiques : '+type);
+	}
+	global.dyn[type]=json;
+
+	main.eventEmitter.emit('updateDynData',{type:type,data:global.dyn[type]});
+
+	var res = { status:200 , etatsServeurs:global.etatsServeurs};
+	if(!!global.ref[type] && global.refTime[type]==NOT_INITIALIZED) res.action = 'SEND_REF';
+	return res;
+}
 exports.initTest = function (config) {	
-
 	console.log('---Test mode : Création des évènements');
-
 	var iTime = (new Date()).getTime();
 	var oEvts = JSON.parse('{'	
 	+ '"SEM_3100":{"type":"restriction_ltc","id":"34677","dateDebut":"24/02/2015 05:20","dateFin":"31/12/2050 23:59","heureDebut":"00:00:00","heureFin":"00:00:00","latitude":"-1","longitude":"-1","weekEnd":"2","listeLigneArret":"SEM_48","texte":"48 : Travaux secteur Claix Mairie|Du 24/02/2015 05:20|Jusqu\'à une date indéterminée|  La ligne est déviée, en direction de Pont Rouge, entre les arrêts Furonnières et Les Fayards.|Arrêt(s) non desservi(s): Claix Mairie (->Pont Rouge)."},'

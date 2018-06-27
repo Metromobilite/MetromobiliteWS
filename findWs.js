@@ -23,217 +23,323 @@
 // module de recherche associé aux données chargées par le module points.js
 // recherches d'objets ponctuels en mode geographique ou texte
 
-var turf = require('turf');
+var turf = require('@turf/turf');
 var fs = require('fs');
 var querystring = require('querystring');
 var xml2js = require('xml2js');
 var j2xls = require('json2xls-xml')({ pretty : true });
+const Joi = require('koa-joi-router').Joi;
 var main = require('./index');
+var points = require('./points');
 
 var distNear = 300;
 var findIgnore = ["N°","COL","PARC","PIED","CLOS","PLAN","PONT","QUAI","COURS","COUR","SQUARE","TUNNEL","CHEMIN","HAMEAU","SENTIER","DOMAINE","PASSAGE","COLLEGE","VILLAGE","LIEU-DIT","BOULEVARD","ECHANGEUR","CARREFOUR","ROND-POINT","LOTISSEMENT","RUE","VOIE","CITE","GARE","PLACE","ROUTE","MAIRIE","GRANDE","GRANDE","MONTEE","PLAINE","ROCADE","TRAVERSE","RESIDENCE","PASSERELLE","DEPARTEMENTALE","NATIONALE","ILE","ALLEE","AVENUE","IMPASSE","ECHANGEUR","AUTOROUTE","INSTITUTION"];
 
-exports.init = function *() {
-	var config = main.getConfig();
+exports.routes = [
+	{
+		method: 'get',
+		path: '/api/linesNear/json',
+		handler: getLinesNear,
+		meta:{
+			description:'Les lignes de transport en commun possédant un arret à proximité du point choisit.'
+		},
+		groupName: 'Outils',
+		cors:true,
+		validate:{
+			query:{
+				x:Joi.number(),
+				y:Joi.number(),
+				dist:Joi.number().integer(),
+				details:Joi.any()
+			}
+		}
+	},
+	{
+		method: 'get',
+		path: '/api/findType/json',
+		handler: findType,
+		meta:{
+			description:'Les données ponctuelles filtrées par type, et eventuellement par nom.'
+		},
+		groupName: 'Référentiel',
+		cors:true
+	},
+	{
+		method: 'get',
+		path: '/api/find/json',
+		handler: findText,
+		meta:{
+			description:'Recherche de point de depart/arrivée pour le calcul d\'itineraire'
+		},
+		private:true,
+		groupName: 'saisie',
+		cors:true
+	},	
+	{
+		method: 'get',
+		path: '/api/points/json',
+		handler: getPoints,
+		meta:{
+			description:'Les données ponctuelles filtrées par type, et eventuellement par code.'
+		},
+		groupName: 'Référentiel',
+		cors:true
+	},
+	{
+		method: 'get',
+		path: '/api/bbox/json',
+		handler: getBBox,
+		meta:{
+			description:'Les données ponctuelles filtrées par type, et par zone geographique au format geojson.'
+		},
+		groupName: 'Référentiel',
+		cors:true
+	},
+	{
+		method: 'get',
+		path: '/api/bbox/csv',
+		handler: getBBoxCsv,
+		meta:{
+			description:'Les données ponctuelles filtrées par type, et par zone geographique au format csv.'
+		},
+		groupName: 'Référentiel',
+		cors:true
+	},
+	{
+		method: 'get',
+		path: '/api/bbox/xls',
+		handler: getBBoxXls,
+		meta:{
+			description:'Les données ponctuelles filtrées par type, et par zone geographique au format xls.'
+		},
+		groupName: 'Référentiel',
+		cors:true
+	}
+];
+
+exports.init = async function (config) {
 	try {
-		// init chargement liste d'echangeurs
-		var data = fs.readFileSync(config.dataPath+'Echangeurs.xml', 'utf8');
+		// init chargement liste d'echangeurs si on a le fichier
+		if(typeof(config.plugins.findWs.file)=='undefined') {console.log("Pas de gestion d'échangeur"); return;}
+		
+		var data = fs.readFileSync(config.dataPath+config.plugins.findWs.file, 'utf8');
 		var parser = new xml2js.Parser();
 		parser.parseString(data, function (err, result) {
 			parseAxes(result);
 		});
-		console.log('filtrage geographique');
-		var data = fs.readFileSync(config.dataPath+config.dataFilter, 'utf8');
-		var rectangle = JSON.parse(data);
-		var pointsRectangle = turf.within(global.poi, rectangle);
-		global.poi = pointsRectangle;
 	} catch(e){
 		main.dumpError(e,'find.init');
 	}
 }
 
-exports.initKoa = function (app,route) {
-	// http://data.metromobilite.fr/api/linesNear/json?x=5.709360123&y=45.176494599999984&dist=400&details=true
-	app.use(route.get('/api/linesNear/json', function *() {
-		try{
-			var params = querystring.parse(this.querystring);
-			if (!params.x || !params.y) return [];
-			
-			if(!params.dist) params.dist = distNear;
-			if(!params.details) params.details = false;
-			
-			var pointCentral = {
-				"type": "Feature",
-				"properties": {},
-				"geometry": {
-					"type": "Point",
-					"coordinates": [params.x, params.y]
-				}
-			};
-			var distance = params.dist/2000;
-			var bearing = -90;
-			var units = 'kilometers';
-
-			var ptemp = turf.destination(pointCentral, distance, bearing, units);
-			bearing = -180;
-			var pmin = turf.destination(ptemp, distance, bearing, units);
-			bearing = 0;
-			distance=params.dist/1000;
-			ptemp = turf.destination(pmin, distance, bearing, units);
-			bearing = 90;
-			var pmax = turf.destination(ptemp, distance, bearing, units);
-			
-			var q = this.querystring+'&types=pointArret&xmin='+pmin.geometry.coordinates[0]+'&xmax='+pmax.geometry.coordinates[0]+'&ymin='+pmin.geometry.coordinates[1]+'&ymax='+pmax.geometry.coordinates[1];
-			
-			var p = querystring.parse(q);
-			var ptsWithin = exports.findObjectGeom(p,global.poi);
-			
+//https://data.metromobilite.fr/api/linesNear/json?x=5.709360123&y=45.176494599999984&dist=400&details=true
+//http://localhost:3000/api/linesNear/json?x=5.709360123&y=45.176494599999984&dist=400&details=true
+async function getLinesNear(ctx){
+	try{
+		if(!!global.plugins.name['otpHoraires']) {
+			var params = querystring.parse(ctx.querystring);
 			var lines = [];
-			var linesAdded = {};
 			var details = [];
-			ptsWithin.features.forEach(function (feature,index){
-				var id = feature.properties.CODE.replace('_',':');
-				var stop = {
-					id:id,
-					name:feature.properties.LIBELLE,
-					lon:feature.geometry.coordinates[0],
-					lat:feature.geometry.coordinates[1],
-					lines:[]
-				};
-				global.poteaux[id].lgn.forEach(function(l){
+
+			exports.linesNear(params,lines,details);
+			
+			ctx.body = (params.details?details:lines);
+		} else {
+			ctx.body = [];
+		}
+	} catch(e){
+		main.dumpError(e,'/api/linesNear/json');
+	}
+}
+
+// http://data.metromobilite.fr/api/findType/json?types=agenceM,pointService,dat&query=chavant
+async function findType(ctx) {
+	try {
+		var config = main.getConfig();
+		var params = querystring.parse(decodeURIComponent(ctx.querystring));
+		var types = [];
+		if(!!params.types) types = params.types.split(',');
+		var pts = points.getPoints(types);
+		var ptsWithin = exports.findObjectQueryType(params,pts,config);
+		ctx.body = ptsWithin;
+	} catch(e){
+		main.dumpError(e,'findType');
+	}
+}
+// * http://data.metromobilite.fr/api/find/json?query=val
+async function findText(ctx) {
+	try {
+		var params = querystring.parse(decodeURIComponent(ctx.querystring));
+		var ptsWithin = exports.findObjectQuery(params,global.findText);
+		ctx.body = ptsWithin;
+	} catch(e){
+		main.dumpError(e,'findText');
+	}
+}
+// http://data.metromobilite.fr/api/points/json?types=arret
+// http://localhost:3000/api/points/json?types=arret&codes=SEM:GENCHAVANT
+async function getPoints(ctx) {
+	try {
+		var params = querystring.parse(ctx.querystring);
+		var types = [];
+		if(!!params.types) types = params.types.split(',');
+		var pts = points.getPoints(types);
+		var ptsWithin = exports.findObjectCode(params,pts);
+		ctx.body = ptsWithin;
+	} catch(e){
+		main.dumpError(e,'/api/points/json');
+	}
+}
+// http://data.metromobilite.fr/api/bbox/json?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
+async function getBBox(ctx){
+	try {
+		var params = querystring.parse(ctx.querystring);
+		var types = points.types;
+		if(!!params.types) types = params.types.split(',');
+		var pts = points.getPoints(types);
+		var ptsWithin = exports.findObjectGeom(params,pts);
+		ctx.body = ptsWithin;
+	} catch(e){
+		main.dumpError(e,'getBBox');
+	}
+}
+// http://data.metromobilite.fr/api/bbox/csv?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
+async function getBBoxCsv(ctx) {
+	try {
+		var params = querystring.parse(ctx.querystring);
+		var types = points.types;
+		if(!!params.types) types = params.types.split(',');
+		var pts = points.getPoints(types);
+		var ptsWithin = exports.findObjectGeom(params,pts);
+		var csvString="";
+		//initialisation of column's name
+		var properties = ptsWithin.features[0].properties;
+		for(var p in properties) {
+			csvString+="\""+p+"\",";
+		}
+		csvString+="lon,";
+		csvString+="lat";
+		csvString+="\n";
+		
+		//column's filling 
+		ptsWithin.features.forEach(function (feature,index){
+			var properties = feature.properties;
+			for(var p in properties) {
+				csvString+="\""+properties[p]+"\",";
+			}
+			var geometry = feature.geometry;
+			csvString+=geometry.coordinates[0]+",";
+			csvString+=geometry.coordinates[1]+"\n";
+		});
+		
+		//header's filling
+		ctx.body = csvString;
+		ctx.set('Content-Type', 'text/csv');
+		ctx.set('Content-Disposition', 'attachment;filename=export.csv');
+		
+	} catch(e){
+		main.dumpError(e,'getBBoxCsv');
+	}
+}
+// http://data.metromobilite.fr/api/bbox/xls?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
+async function getBBoxXls(ctx) {
+	try {
+		var params = querystring.parse(ctx.querystring);
+		var types = points.types;
+		if(!!params.types) types = params.types.split(',');
+		var pts = points.getPoints(types);
+		var ptsWithin = exports.findObjectGeom(params,pts);
+		var obj = { feuille1:[]};
+		
+		//object filling 
+		ptsWithin.features.forEach(function (feature,index){
+			var properties = feature.properties;
+			var geometry = feature.geometry;
+			var xlsJsonLine ={};
+			for(var p in properties){
+				xlsJsonLine[p] = properties[p];
+			}
+			xlsJsonLine["lon"] = geometry.coordinates[0];
+			xlsJsonLine["lat"] = geometry.coordinates[1];
+			obj.feuille1.push(xlsJsonLine);
+			//console.log(j2xls(obj));
+		});
+		
+		//header's filling
+		
+		ctx.body = j2xls(obj);
+		ctx.set('Content-Type', 'text/xls');
+		ctx.set('Content-Disposition', 'attachment;filename=export.xls');
+		
+	} catch(e){
+		main.dumpError(e,'getBboxXls');
+	}
+}
+exports.linesNear = function(params,lines,details){
+	try {
+		if (!params.x || !params.y) return [];
+					
+		if(!params.dist) params.dist = distNear;
+		if(!params.details) params.details = false;
+		
+		var pointCentral = {
+			"type": "Feature",
+			"properties": {},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [+params.x, +params.y]
+			}
+		};
+		var distance = params.dist/2000;
+		var bearing = -90;
+		var units = 'kilometers';
+
+		var ptemp = turf.destination(pointCentral, distance, bearing, units);
+		bearing = -180;
+		var pmin = turf.destination(ptemp, distance, bearing, units);
+		bearing = 0;
+		distance=params.dist/1000;
+		ptemp = turf.destination(pmin, distance, bearing, units);
+		bearing = 90;
+		var pmax = turf.destination(ptemp, distance, bearing, units);
+		//TODO a analyzer tres bizarre
+		var q = this.querystring+'&types=pointArret&xmin='+pmin.geometry.coordinates[0]+'&xmax='+pmax.geometry.coordinates[0]+'&ymin='+pmin.geometry.coordinates[1]+'&ymax='+pmax.geometry.coordinates[1];
+		
+		var p = querystring.parse(q);
+		var ptsWithin = exports.findObjectGeom(p,global.ref['pointArret']);
+				
+		var linesAdded = {};
+		
+		ptsWithin.features.forEach(function (feature,index){
+			var id = feature.properties.CODE.replace('_',':');
+			var stop = {
+				id:id,
+				name:feature.properties.LIBELLE,
+				lon:feature.geometry.coordinates[0],
+				lat:feature.geometry.coordinates[1],
+				lines:[]
+			};
+			if(!global.otp.stops[id]) console.log('linesNear : Missing id '+id+' in OTP');
+			else if(!!global.otp.stops[id].routes) {
+				//global.poteaux[id].lgn.forEach(function(l){
+				global.otp.stops[id].routes.forEach(function(l){
 					if(!linesAdded[l]){
 						lines.push(l);
 						linesAdded[l] = true;
 					}
 					stop.lines.push(l);
 				});
-				if(stop.lines.length>0) details.push(stop);
-			});
-			this.body = (params.details?details:lines);
-		} catch(e){
-			main.dumpError(e,'/api/linesNear/json');
-		}
-	}));
-
-	// http://data.metromobilite.fr/api/findType/json?types=agenceM,pointService,dat&query=chavant
-	app.use(route.get('/api/findType/json', function *() {
-		try {
-			var config = main.getConfig();
-			//var params=extractUrlParams(decodeURIComponent(this.querystring));
-			var params = querystring.parse(decodeURIComponent(this.querystring));
-			ptsWithin = exports.findObjectQueryType(params,global.poi,config);
-			this.body = ptsWithin;
-		} catch(e){
-			main.dumpError(e,'/api/findType/json');
-		}
-	}));
-
-	// * http://data.metromobilite.fr/api/find/json?query=val
-	app.use(route.get('/api/find/json', function *() {
-		try {
-			//var params=extractUrlParams(decodeURIComponent(this.querystring));
-			var params = querystring.parse(decodeURIComponent(this.querystring));
-			ptsWithin = exports.findObjectQuery(params,global.findText);
-			this.body = ptsWithin;
-		} catch(e){
-			main.dumpError(e,'/api/find/json');
-		}
-	}));
-
-	// http://data.metromobilite.fr/api/points/json?types=arret
-	app.use(route.get('/api/points/json', function *() {
-		try {
-			//var params=extractUrlParams(this.querystring);
-			var params = querystring.parse(this.querystring);
-			ptsWithin = exports.findObjectCode(params,global.poi);
-			this.body = ptsWithin;
-		} catch(e){
-			main.dumpError(e,'/api/points/json');
-		}
-	}));
-
-	// http://data.metromobilite.fr/api/bbox/json?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
-	app.use(route.get('/api/bbox/json', function *() {
-		try {
-			//var params=extractUrlParams(this.querystring);
-			var params = querystring.parse(this.querystring);
-			ptsWithin = exports.findObjectGeom(params,global.poi);
-			this.body = ptsWithin;
-		} catch(e){
-			main.dumpError(e,'/api/bbox/json');
-		}
-	}));
-
-	// http://data.metromobilite.fr/api/bbox/csv?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
-	app.use(route.get('/api/bbox/csv', function *() {
-		try {
-			//var params=extractUrlParams(this.querystring);
-			var params = querystring.parse(this.querystring);
-			ptsWithin = exports.findObjectGeom(params,global.poi);
-			var csvString="";
-			//initialisation of column's name
-			var properties = ptsWithin.features[0].properties;
-			for(var p in properties) {
-				csvString+="\""+p+"\",";
+				if(stop.lines.length>0 && details) 
+					details.push(stop);
+			} else {
+				console.log('No routes on stop '+id);
 			}
-			csvString+="lon,";
-			csvString+="lat";
-			csvString+="\n";
-			
-			//column's filling 
-			ptsWithin.features.forEach(function (feature,index){
-				var properties = feature.properties;
-				for(var p in properties) {
-					csvString+="\""+properties[p]+"\",";
-				}
-				var geometry = feature.geometry;
-				csvString+=geometry.coordinates[0]+",";
-				csvString+=geometry.coordinates[1]+"\n";
-			});
-			
-			//header's filling
-			this.body = csvString;
-			this.set('Content-Type', 'text/csv');
-			this.set('Content-Disposition', 'attachment;filename=export.csv');
-			
-		} catch(e){
-			main.dumpError(e,'/api/bbox/csv');
-		}
-	}));
-
-	// http://data.metromobilite.fr/api/bbox/xls?ymax=45.24044787140255&xmin=5.58581466027832&ymin=45.12077924804393&xmax=5.877467339721679&types=arret,pointArret
-	app.use(route.get('/api/bbox/xls', function *() {
-		try {
-			//var params=extractUrlParams(this.querystring);
-			var params = querystring.parse(this.querystring);
-			ptsWithin = exports.findObjectGeom(params,global.poi);
-			var obj = { feuille1:[]};
-			
-			//object filling 
-			ptsWithin.features.forEach(function (feature,index){
-				var properties = feature.properties;
-				var geometry = feature.geometry;
-				var xlsJsonLine ={};
-				for(var p in properties){
-					xlsJsonLine[p] = properties[p];
-				}
-				xlsJsonLine["lon"] = geometry.coordinates[0];
-				xlsJsonLine["lat"] = geometry.coordinates[1];
-				obj.feuille1.push(xlsJsonLine);
-				//console.log(j2xls(obj));
-			});
-			
-			//header's filling
-			
-			this.body = j2xls(obj);
-			this.set('Content-Type', 'text/xls');
-			this.set('Content-Disposition', 'attachment;filename=export.xls');
-			
-		} catch(e){
-			main.dumpError(e,'/api/bbox/xls');
-		}
-	}));
+		});
+	} catch(e){
+		main.dumpError(e,'linesNear');
+	}
 }
+
 
 exports.findObjectGeom = function(params,gPoi){
 		if(typeof(params.xmin)=='undefined' 
@@ -254,43 +360,31 @@ exports.findObjectGeom = function(params,gPoi){
 			  "geometry": {
 				"type": "Polygon",
 				"coordinates": [[
-					[params.xmin, params.ymin],
-					[params.xmin, params.ymax],
-					[params.xmax, params.ymax],
-					[params.xmax, params.ymin],
-					[params.xmin, params.ymin]
+					[+params.xmin, +params.ymin],
+					[+params.xmin, +params.ymax],
+					[+params.xmax, +params.ymax],
+					[+params.xmax, +params.ymin],
+					[+params.xmin, +params.ymin]
 				]]
 			  }
 			}
 		  ]
 		};
 		var poiTyped={"type": "FeatureCollection", "features": []};
-		var ptsWithin;
-		if (params.types) {
-			var types = params.types.split(',');
-			poiTyped.features = gPoi.features.filter(function(f){
-				return (types.indexOf(f.properties.type)!=-1);
-			});
-			ptsWithin = turf.within(poiTyped, searchWithin);
-		} else {
-			ptsWithin = turf.within(gPoi, searchWithin);
-		}
+		var ptsWithin = turf.within(gPoi, searchWithin);
 		return ptsWithin;
 
 }
 
 exports.findObjectCode = function(params,gPoi){
-	var poiTyped={"type": "FeatureCollection", "features": []};
-	if (params.types) {
-		var types = params.types.split(',');
-		poiTyped.features = gPoi.features.filter(function(f){
-			return (types.indexOf(f.properties.type)!=-1);
-		});
-	}
-	var ptsCodes=poiTyped;
+	var ptsCodes=gPoi;
 	if (params.codes) {
-		var codes = params.codes.split(',');
-		ptsCodes.features = poiTyped.features.filter(function(f){
+		var codes;
+		if (params.codes.indexOf(":")!=-1)
+			codes = params.codes.replace(/\:/g, '_').split(',');
+		else
+			codes = params.codes.split(',');
+		ptsCodes.features = gPoi.features.filter(function(f){
 			return (codes.indexOf(f.properties.CODE)!=-1);
 		});
 	}
@@ -298,15 +392,9 @@ exports.findObjectCode = function(params,gPoi){
 }
 exports.findObjectQueryType = function(params,gPoi,config) {
 	var poiTyped={"type": "FeatureCollection", "features": []};
-	if (params.types) {
-		var types = params.types.split(',');
-		poiTyped.features = gPoi.features.filter(function(f){
-			return (types.indexOf(f.properties.type)!=-1);
-		});
-	}
-	var ptsQuery=poiTyped;
+	var ptsQuery=gPoi;
 	if (params.query) {
-		ptsQuery.features = poiTyped.features.filter(function(f){
+		ptsQuery.features = gPoi.features.filter(function(f){
 			return cleanLib(f.properties[config.types[f.properties.type].find]).indexOf(cleanLib(params.query))!=-1;
 		});
 	}
@@ -325,7 +413,15 @@ exports.findObjectQuery = function(params,gFindText) {
 		res.features = res.features.filter(function(f,idx){
 			if(params.types && params.types.indexOf(f.properties.type)==-1) return false;
 			if(f.properties.type != 'arret' && f.properties.type != 'axe' && query.length < 4) return false;
-			if((!params.rect || params.rect!='2') && f.properties.rect == '2') return false;
+			//if((!params.rect || params.rect!='2') && f.properties.rect == '2') return false;
+			
+			if(!params.epci) params.epci = "LaMetro"; //Init pour la TAG
+			
+			if (params.epci !== "None" && f.properties.type != 'axe') {
+				if ((params.epci !== "All") && ((params.epci.indexOf("LaMetro")==-1 && params.epci.indexOf("LeGresivaudan")==-1 && params.epci.indexOf("PaysVoironnais")==-1))) return false; //Aucun des epci n'est selectionné			
+				if ((params.epci !== "All")  && !((params.epci.indexOf("LaMetro")!==-1 && f.properties.LaMetro) || (params.epci.indexOf("LeGresivaudan")!==-1 && f.properties.LeGresivaudan) || (params.epci.indexOf("PaysVoironnais")!==-1 && f.properties.PaysVoironnais))) return false; // le ou les epci selectionnés sont à false
+			}
+		
 			var d = matchWords(f,idx,query);
 			//on met le poids dans l'enregistrement courant avant la copie
 			this[idx].properties.dist = d;
@@ -340,29 +436,39 @@ exports.findObjectQuery = function(params,gFindText) {
 function matchWords(f,idx,query) {
 	var dist = 0;
 	var distCommune = 0;
-	var words = cleanLib(query).split(" ");
-	if(cleanLib(query) == cleanLib(f.properties.LIBELLE)) return words.length*10;
+	var cleanQuery = cleanLib(query);
+	var cleanLibelle = cleanLib(f.properties.LIBELLE);
+	var cleanCommune = cleanLib(f.properties.COMMUNE);
+	var words = cleanQuery.split(" ");
+	
+	if(cleanQuery == cleanLibelle) return words.length*10;
+	if(cleanQuery == cleanLibelle+' '+cleanCommune) return words.length*10;
+	if(cleanQuery == cleanCommune+' '+cleanLibelle) return words.length*10;
+
 	words.forEach(function(w,i){
 		if(f.properties.type != 'arret' && f.properties.type != 'axe' && w.length < 3) return;//test NB de 4 a 3 pour avoir lac
 		if(f.properties.type == 'arret' && (w.length < 2 || w == 'LES' || w == 'DES')) return;
 		if(f.properties.type != 'axe' && w.length < 3) return;
 		var dw = matchWord(w,i,f);
 		// test NB on match soit la commune soit le reste
-		if (dw.dist>=dw.distCommune) 
+		if (dw.dist > 0 && dw.dist>=dw.distCommune) {
 			dist+=dw.dist;
-		else 
+		} else if(dw.distCommune > 0){
+
 			distCommune+=dw.distCommune;
+		}
 	});
 	if(dist>10) {//strictement superieur a 10 car sinon les levenstein a 1 sont aussi bien que les match sur 1 mot avec un 2e mot absent
 		// on retranche 1 par mot dans l'enregistrement manquant dans la requete
-		var  tabFeatureLib =  cleanLib(f.properties.LIBELLE).split(' ').forEach(function(fw){
+		var  tabFeatureLib =  cleanLibelle.split(' ').forEach(function(fw){
 			var bNotExist = words.indexOf(fw)==-1;
 			if (/*fw.length>2 && fw != 'LES' && fw != 'DES' &&*/ (bNotExist)) {//test NB pour favoriser exactitude
 				dist+=-1;
 			}
 		});
 	}
-	 return (dist>0?''+(dist+distCommune):0);
+	var ratioLongueur = Math.min(cleanQuery.length,cleanLibelle.length+cleanCommune.length+1)/Math.max(cleanQuery.length,cleanLibelle.length+cleanCommune.length+1);// +1 pour l'espace	
+	return (dist>1?''+Math.round(dist+distCommune*ratioLongueur):0);
 }
 
 var maxLevDist = 1;
@@ -522,6 +628,5 @@ function parseAxes(xml) {
 			global.findText.features.push(f);
 		});
 	});
-	console.log('axes loaded.');
-	
+	console.log('axes loaded.');	
 }
